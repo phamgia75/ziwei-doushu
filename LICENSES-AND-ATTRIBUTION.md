@@ -10,6 +10,8 @@
 | lunar-javascript 1.7.7 | MIT | via engine |
 | Hồ Ngọc Đức lunar calendar algorithm | published algorithm (re-implemented) | `lib/calendar/vn-lunar.ts` |
 | next 16.4.3, react 19.3, framer-motion, clsx, tailwindcss, html2canvas, tsx | MIT | runtime/build |
+| pdf-lib 1.17.1, @pdf-lib/fontkit 1.1.1 | MIT | in-browser PDF report |
+| Be Vietnam Pro (Regular, Bold) — `public/fonts/` with `OFL.txt` | SIL OFL 1.1 | embedded (subset) in PDF reports |
 | typescript, @playwright/test | Apache-2.0 | dev |
 
 Required attribution (shown on the About page and README-VI):

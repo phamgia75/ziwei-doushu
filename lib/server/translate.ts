@@ -78,13 +78,52 @@ function systemPrompt(glossary: string[], strict: boolean): string {
 
 const keyOf = (model: string, zh: string) => createHash('sha256').update(`${PROMPT_VERSION}\n${model}\n${zh}`).digest('hex');
 
+/** Han runs left outside parentheses / 《》 in a translation. */
+const leftoverHan = (vi: string) => [...new Set((vi.replace(/[（(][^）)]*[）)]/g, '').replace(/《[^》]*》/g, '').match(/\p{Script=Han}+/gu) ?? []))];
+
+/**
+ * Repair pass: translate only the Chinese fragments still left in an otherwise Vietnamese translation
+ * (one short request, fragments shown in their source context), substitute them, re-validate.
+ */
+export async function repairLeftoverHan(zh: string, vi: string, model: string, glossary: string[], signal?: AbortSignal): Promise<{ vi: string; issues: string[] } | null> {
+  const runs = leftoverHan(vi).slice(0, 12);
+  if (!runs.length) return null;
+  const out = await complete('ollama', model, [
+    { role: 'system', content: 'Bạn là dịch giả Tử Vi Đẩu Số. Với mỗi cụm chữ Hán được liệt kê, cho nghĩa tiếng Việt ngắn gọn phù hợp ngữ cảnh. Trả về đúng định dạng mỗi dòng: <chữ Hán> = <tiếng Việt>. Không thêm gì khác.' },
+    { role: 'user', content: `Ngữ cảnh gốc:\n${zh}\n\nCác cụm cần dịch:\n${runs.join('\n')}` },
+  ], { signal, temperature: 0, maxTokens: 400 });
+  let fixed = vi;
+  for (const line of out.split('\n')) {
+    const m = /^\s*[-*]?\s*(\p{Script=Han}+)\s*[=:：]\s*(.+?)\s*$/u.exec(line);
+    if (!m || !runs.includes(m[1]) || HAN.test(m[2])) continue;
+    // keep word boundaries: "thị phi反倒多" → "thị phi ngược lại nhiều", not "thị phingược lại"
+    fixed = fixed.replace(new RegExp(`(\\p{L})?${m[1]}(\\p{L})?`, 'gu'), (_, a, b) => `${a ? `${a} ` : ''}${m[2]}${b ? ` ${b}` : ''}`);
+  }
+  if (fixed === vi) return null;
+  return { vi: fixed, issues: validateTranslation(zh, fixed, glossary) };
+}
+
 export async function translateChunk(zh: string, signal?: AbortSignal): Promise<Translated> {
   if (!HAN.test(zh)) return { zh, vi: zh, ok: true, issues: [], cached: true };
   const model = await pickOllamaModel();
   const file = join(cacheDir(), `${keyOf(model, zh)}.json`);
-  if (existsSync(file)) return { ...JSON.parse(readFileSync(file, 'utf8')), cached: true };
-
   const glossary = glossaryFor(zh).slice(0, 40);
+  const save = (r: { zh: string; vi: string; ok: boolean; issues: string[]; repaired?: boolean }) => {
+    mkdirSync(cacheDir(), { recursive: true });
+    writeFileSync(file, JSON.stringify({ ...r, model, promptVersion: PROMPT_VERSION }));
+  };
+  if (existsSync(file)) {
+    const c = JSON.parse(readFileSync(file, 'utf8'));
+    // older cached failures with leftover Han get one repair attempt, then stay as they are
+    if (!c.ok && !c.repaired && leftoverHan(c.vi).length) {
+      const r = await repairLeftoverHan(zh, c.vi, model, glossary, signal).catch(() => null);
+      const next = r && r.issues.length < c.issues.length ? { zh, vi: r.vi, ok: !r.issues.length, issues: r.issues, repaired: true } : { ...c, repaired: true };
+      save(next);
+      return { ...next, cached: true };
+    }
+    return { ...c, cached: true };
+  }
+
   const maxTokens = Math.min(4096, 200 + zh.length * 4);
   let best: { vi: string; issues: string[] } | null = null;
   for (const strict of [false, true]) {
@@ -96,9 +135,13 @@ export async function translateChunk(zh: string, signal?: AbortSignal): Promise<
     if (!best || issues.length < best.issues.length) best = { vi, issues };
     if (!issues.length) break;
   }
-  const result = { zh, vi: best!.vi, ok: best!.issues.length === 0, issues: best!.issues };
-  mkdirSync(cacheDir(), { recursive: true });
-  writeFileSync(file, JSON.stringify({ ...result, model, promptVersion: PROMPT_VERSION }));
+  let repaired = false;
+  if (best!.issues.length && leftoverHan(best!.vi).length) {
+    const r = await repairLeftoverHan(zh, best!.vi, model, glossary, signal).catch(() => null);
+    if (r && r.issues.length < best!.issues.length) { best = r; repaired = true; }
+  }
+  const result = { zh, vi: best!.vi, ok: best!.issues.length === 0, issues: best!.issues, repaired };
+  save(result);
   return { ...result, cached: false };
 }
 

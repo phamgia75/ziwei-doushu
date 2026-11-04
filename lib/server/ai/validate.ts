@@ -9,6 +9,7 @@
  */
 import type { ZiweiChart } from '@/lib/ziwei/types';
 import { verifyClaims, type Claim } from './claims';
+import { findTermIssues } from '@/lib/i18n/terminology';
 
 export interface PlacementIssue { sentence: string; detail: string }
 export interface ValidationReport {
@@ -22,6 +23,8 @@ export interface ValidationReport {
   citedSources: string[];
   invalidRefs: string[];
   hanOutsideParens: number;
+  /** Non-standard Vietnamese terminology (lib/i18n/terminology.ts VARIANTS). */
+  termIssues: { found: string; canonical: string }[];
 }
 
 export const FACTS_HEADING = 'Dữ kiện lá số';
@@ -66,6 +69,7 @@ export function validateOutput(text: string, chart: ZiweiChart | ZiweiChart[], f
     placementIssues: placements.filter(c => c.status === 'contradicted').map(c => ({ sentence: c.sentence, detail: c.detail })),
     structure: { factsSection: facts !== null, interpretationSection: text.split('\n').some(l => norm(l).startsWith(norm(INTERP_HEADING))) },
     citedFacts, citedSources, invalidRefs,
+    termIssues: [...new Map(findTermIssues(text).filter(i => i.kind === 'variant').map(i => [i.found, { found: i.found, canonical: i.canonical }])).values()],
     hanOutsideParens: (text.replace(/[（(][^）)]*[）)]/g, '').replace(/《[^》]*》/g, '').match(/\p{Script=Han}/gu) ?? []).length,
   };
 }
@@ -81,5 +85,6 @@ export function validationNote(r: ValidationReport): string {
   if (r.invalidRefs.length) lines.push(`- Trích dẫn không tồn tại: ${r.invalidRefs.join(', ')}.`);
   if (!r.structure.factsSection) lines.push(`- Câu trả lời không tách riêng mục “${FACTS_HEADING}”; mọi nhận định dưới đây là luận giải, chỉ các mã [F#] là dữ kiện tính toán.`);
   if (r.hanOutsideParens > 10) lines.push('- Câu trả lời còn lẫn chữ Hán chưa dịch.');
+  if (r.termIssues.length) lines.push(`- Thuật ngữ chưa chuẩn: ${r.termIssues.map(i => `${i.found} → ${i.canonical}`).join(', ')}.`);
   return lines.length ? `\n\n---\n**⚠️ Kiểm chứng tự động**\n${lines.join('\n')}` : '';
 }

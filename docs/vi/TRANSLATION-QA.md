@@ -6,11 +6,11 @@
 
 - Mô hình dịch: Ollama `qwen3.5:35b` (cục bộ), qua `translateChunk` (lib/server/translate.ts), có cache.
 - Số đoạn: 45 (39 từ bộ dữ liệu v4.0, 6 cổ thư).
-- Đạt toàn bộ kiểm tra tự động: **36/45 (80%)**.
+- Đạt toàn bộ kiểm tra tự động: **42/45 (93%)**.
 
 | Loại lỗi | Số đoạn |
 |---|---|
-| Còn chữ Hán ngoài ngoặc | 8 |
+| Còn chữ Hán ngoài ngoặc | 2 |
 | Tỉ lệ độ dài bất thường (<1.3 hoặc >7) | 0 |
 | Thiếu thuật ngữ bắt buộc | 1 |
 | Cách viết không chuẩn (VARIANTS) | 0 |
@@ -19,28 +19,28 @@ Thuật ngữ hay bị thiếu: cung Phụ Mẫu (1).
 
 | Dạng đoạn | Đạt |
 |---|---|
-| prose | 10/13 (77%) |
+| prose | 13/13 (100%) |
 | heading | 8/9 (89%) |
 | list | 7/9 (78%) |
 | star | 8/8 (100%) |
-| classic | 3/6 (50%) |
+| classic | 6/6 (100%) |
 
 | Chủ đề / nguồn | Đạt |
 |---|---|
 | overview | 3/3 (100%) |
-| personality | 2/3 (67%) |
+| personality | 3/3 (100%) |
 | love | 3/3 (100%) |
 | career | 3/3 (100%) |
 | wealth | 3/3 (100%) |
 | health | 3/3 (100%) |
 | family | 3/3 (100%) |
 | children | 3/3 (100%) |
-| move | 2/3 (67%) |
-| friends | 0/3 (0%) |
+| move | 3/3 (100%) |
+| friends | 1/3 (33%) |
 | home | 3/3 (100%) |
 | spirit | 3/3 (100%) |
 | parents | 2/3 (67%) |
-| cổ thư | 3/6 (50%) |
+| cổ thư | 6/6 (100%) |
 
 ## Ví dụ kém nhất
 
@@ -50,29 +50,17 @@ Thuật ngữ hay bị thiếu: cung Phụ Mẫu (1).
 - zh: · **太阳入父母宫**——父亲与上司多在公众场合发挥影响。 · **父母太阳入庙**——父亲社会地位高，是重要贵人。 · **父母太阳落陷**——古书「陷地克父」，主先克父。
 - vi: · **Thái Dương nhập Phụ Mẫu cung** – Cha và cấp trên thường phát huy ảnh hưởng tại các nơi công cộng. · **Phụ Mẫu Thái Dương miếu vượng** – Địa vị xã hội của cha cao, là quý nhân trọng yếu. · **Phụ Mẫu Thái Dương hãm địa…
 
-### cl-2 (classic, gusuifu/4/gsf-5-1)
+### ds-29 (heading, 1960s-friends)
 
 - Lỗi: còn 1 cụm chữ Hán
-- zh: 天机、太阴、天同、天梁四星齐入命迁财官，称「机月同梁格」。主文质彬彬、聪慧善谋。最适合公职、学术、文艺、医疗、服务等需稳定累积的行业，不宜大冒险大投机。
-- vi: Thiên Cơ, Thái Âm, Thiên Đồng, Thiên Lương tứ tinh đồng nhập Mệnh, Thiên Di, Tài Bạch, Quan Lộc, gọi là «Cơ Nguyệt Đồng Lương cách». Chủ văn chất彬彬, thông tuệ thiện mưu. Tối thích công chức, học thuật, văn nghệ, y tế, dị…
+- zh: **【人际总览】**
+- vi: **【Tổng quan Nhân際】**
 
-### cl-3 (classic, quanji/0/qj-1-1)
-
-- Lỗi: còn 1 cụm chữ Hán
-- zh: 夫紫微斗数者，乃陈抟祖师所传，原以紫微为帝座，统御百星。星曜各有所主，各有庙旺利陷之分，会照吉凶之别。看命者，必先安星，次定命宫身宫，三看十二宫吉凶，四参大限流年之飞化。
-- vi: Tử Vi Đẩu Số là do Tổ Sư Trần Thuấn truyền lại, nguyên bản lấy Tử Vi làm Đế tọa, thống ngự bách tinh. Các sao đều có chủ quản riêng, mỗi sao đều có phân biệt miếu vượng lợi hãm, sự khác biệt về cát hung khi hội chiếu. Ng…
-
-### cl-6 (classic, quanshu/3/qs-4-1)
+### ds-30 (list, 1960s-friends)
 
 - Lỗi: còn 1 cụm chữ Hán
-- zh: 夫妻宫主配偶气质、婚姻状态。夫妻宫紫微主配偶端庄威权，宜迟婚；夫妻宫贪狼主配偶多情，桃花重；夫妻宫天梁主配偶成熟稳重，年长。
-- vi: Cung Phu Thê chủ về khí chất của phu thê, trạng thái hôn nhân. Cung Phu Thê có Tử Vi thì chủ phu thê đoan trang uy quyền, thích hợp kết hôn muộn; cung Phu Thê có Tham Lang thì chủ phu thê đa tình, đào hoa nặng; cung Phu …
-
-### ds-04 (prose, 1960s-personality)
-
-- Lỗi: còn 1 cụm chữ Hán
-- zh: 你天生不是小鸟依人的性子。可从小到大，周围总暗示你「女孩子收着点」。你的气势不是装出来的，眼神里有分量，进任何场合都被一眼认出。这股劲在职场上是本钱，可在两个人的关系里就成了压力。你不是不想温柔，只是很难把温柔演成顺从——你没法把自己摆在别人下面，这不是脾气坏，是你习惯了站在主位。所以你在感情里总撞同一堵墙：吸引你的男人多半也强，处着处着就互相较劲；找个温和的，又嫌他撑不住你。
-- vi: Bạn vốn dĩ không phải là người có tính cách nhu nhược, yếu đuối. Nhưng từ nhỏ đến lớn, xung quanh luôn ám chỉ bạn rằng "con gái nên giữ mình". Khí thế của bạn không phải do giả tạo, ánh mắt mang trọng lượng, bước vào bất…
+- zh: · **天梁入交友宫**——朋友多智者，老成持重。 · **交友天梁会左辅右弼**——下属忠诚有担当。 · **天梁奴多旺主**——下属多，能旺你。
+- vi: · **Thiên Lương nhập cung Nô Bộc** – Bạn bè nhiều trí tuệ, già dặn稳重. · **Cung Nô Bộc Thiên Lương hội Tả Phù Hữu Bật** – Cấp dưới trung thành có trách nhiệm. · **Thiên Lương nô đa vượng chủ** – Cấp dưới đông, có thể làm …
 
 ## Phương pháp
 

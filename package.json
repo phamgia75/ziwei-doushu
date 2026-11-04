@@ -16,10 +16,15 @@
     "check:secrets": "node scripts/security/scan-secrets.mjs",
     "check:audit": "npm audit --audit-level=moderate",
     "start:local": "./scripts/start.sh",
-    "stop:local": "./scripts/stop.sh"
+    "stop:local": "./scripts/stop.sh",
+    "terminology:build": "tsx scripts/i18n/build-terminology.ts",
+    "check:terms": "tsx scripts/i18n/check-terminology.ts",
+    "i18n:qa": "tsx --conditions=react-server scripts/i18n/translation-qa.ts",
+    "perf:bench": "tsx scripts/perf/bench-ai.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
+    "@pdf-lib/fontkit": "^1.1.1",
     "@types/pg": "^8.20.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
@@ -30,6 +35,7 @@
     "iztro": "^2.5.8",
     "lunar-javascript": "^1.7.3",
     "next": "^16.4.3",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.20.0",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"

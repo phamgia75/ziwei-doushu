@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import BirthForm, { type BirthFormState } from '@/components/BirthForm';
 import ChartBoard from '@/components/ChartBoard';
 import ChartSummary from '@/components/ChartSummary';
+import PdfExportButton from '@/components/PdfExportButton';
 import SiteHeader from '@/components/SiteHeader';
 import { TopicsTab, ChatTab, DetailTab, CyclesTab, PatternsTab } from '@/components/workspace/Tabs';
 import { generateChart, setBrightnessSchool } from '@/lib/ziwei/algorithm';
@@ -46,7 +47,7 @@ function Workspace() {
   const [tab, setTab] = useState<Tab>('topics');
   const [palace, setPalace] = useState<Palace | null>(null);
   const [star, setStar] = useState<Star | null>(null);
-  const [extra, setExtra] = useState<{ patterns: PatternVi[]; mingSummary: ReturnType<typeof mingGongSummaryVi> } | null>(null);
+  const [extra, setExtra] = useState<{ patterns: PatternVi[]; mingSummary: ReturnType<typeof mingGongSummaryVi>; facts?: { id: string; text: string }[] } | null>(null);
   const [flash, setFlash] = useState('');
   const lastForm = useRef<BirthFormState | null>(null);
 
@@ -74,7 +75,7 @@ function Workspace() {
     const c = new AbortController();
     fetch('/api/chart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: c.signal,
       body: JSON.stringify({ birth: birthPayload(baseInfo ?? chart.birthInfo), options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar, calendarRegion: vnRegion(form?.province, form?.city) } }) })
-      .then(r => r.ok ? r.json() : null).then(j => j && setExtra({ patterns: j.patterns, mingSummary: j.mingSummary })).catch(() => {});
+      .then(r => r.ok ? r.json() : null).then(j => j && setExtra({ patterns: j.patterns, mingSummary: j.mingSummary, facts: j.facts })).catch(() => {});
     return () => c.abort();
   }, [chart, baseInfo, form, settings.leapMonth, settings.brightness, settings.calendar]);
 
@@ -139,6 +140,8 @@ function Workspace() {
         <div className="no-print" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
           <button type="button" className="tv-btn tv-btn-primary" onClick={onSave}>{savedId ? `✓ ${P.save}` : P.save}</button>
           <button type="button" className="tv-btn" onClick={() => window.print()}>{P.print}</button>
+          <PdfExportButton chart={chart} form={form} birth={baseInfo} settings={settings} facts={extra?.facts} patterns={extra?.patterns}
+            label={saved.find(c => c.id === savedId)?.label || form?.name || undefined} />
           <button type="button" className="tv-btn" onClick={() => setEditing(true)}>{P.edit}</button>
           <button type="button" className="tv-btn" onClick={() => { setChart(null); setForm(null); setSavedId(undefined); router.replace('/chart'); }}>{P.newChart}</button>
           <a className="tv-btn" href="/heming">{P.compare}</a>
