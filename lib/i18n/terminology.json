@@ -1,0 +1,2098 @@
+{
+ "generatedBy": "scripts/i18n/build-terminology.ts — do not edit by hand",
+ "sources": {
+  "iztro vi-VN (MIT)": "lib/i18n/glossary.iztro.json",
+  "TuVi AI curated": "lib/i18n/terms.ts CURATED"
+ },
+ "starGroups": {
+  "七杀": "major",
+  "三台": "misc",
+  "八座": "misc",
+  "凤阁": "misc",
+  "副截": "misc",
+  "副旬": "misc",
+  "劫煞": "misc",
+  "华盖": "misc",
+  "台辅": "misc",
+  "右弼": "aux",
+  "咸池": "misc",
+  "地劫": "sha",
+  "地空": "sha",
+  "大耗": "misc",
+  "天伤": "misc",
+  "天使": "misc",
+  "天刑": "misc",
+  "天厨": "misc",
+  "天同": "major",
+  "天哭": "misc",
+  "天喜": "misc",
+  "天姚": "misc",
+  "天官": "misc",
+  "天寿": "misc",
+  "天巫": "misc",
+  "天府": "major",
+  "天德": "misc",
+  "天才": "misc",
+  "天月": "misc",
+  "天机": "major",
+  "天梁": "major",
+  "天相": "major",
+  "天福": "misc",
+  "天空": "misc",
+  "天虚": "misc",
+  "天贵": "misc",
+  "天钺": "aux",
+  "天马": "aux",
+  "天魁": "aux",
+  "太阳": "major",
+  "太阴": "major",
+  "孤辰": "misc",
+  "寡宿": "misc",
+  "封诰": "misc",
+  "左辅": "aux",
+  "巨门": "major",
+  "年解": "misc",
+  "廉贞": "major",
+  "恩光": "misc",
+  "截空": "misc",
+  "擎羊": "sha",
+  "文昌": "aux",
+  "文曲": "aux",
+  "旬空": "misc",
+  "月德": "misc",
+  "武曲": "major",
+  "火星": "sha",
+  "破军": "major",
+  "破碎": "misc",
+  "禄存": "aux",
+  "紫微": "major",
+  "红鸾": "misc",
+  "蜚廉": "misc",
+  "解神": "misc",
+  "贪狼": "major",
+  "铃星": "sha",
+  "阴煞": "misc",
+  "陀罗": "sha",
+  "龙德": "misc",
+  "龙池": "misc"
+ },
+ "terms": [
+  {
+   "zh": "巨门",
+   "vi": "Cự Môn",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "廉贞",
+   "vi": "Liêm Trinh",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "破军",
+   "vi": "Phá Quân",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "七杀",
+   "vi": "Thất Sát",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "太阳",
+   "vi": "Thái Dương",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "太阴",
+   "vi": "Thái Âm",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "贪狼",
+   "vi": "Tham Lang",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天府",
+   "vi": "Thiên Phủ",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天机",
+   "vi": "Thiên Cơ",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天梁",
+   "vi": "Thiên Lương",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天同",
+   "vi": "Thiên Đồng",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天相",
+   "vi": "Thiên Tướng",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "武曲",
+   "vi": "Vũ Khúc",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "紫微",
+   "vi": "Tử Vi",
+   "category": "chính tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "禄存",
+   "vi": "Lộc Tồn",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天魁",
+   "vi": "Thiên Khôi",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天马",
+   "vi": "Thiên Mã",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天钺",
+   "vi": "Thiên Việt",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "文昌",
+   "vi": "Văn Xương",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "文曲",
+   "vi": "Văn Khúc",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "右弼",
+   "vi": "Hữu Bật",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "左辅",
+   "vi": "Tả Phù",
+   "category": "phụ tinh",
+   "source": "iztro vi-VN (MIT)",
+   "note": "Chọn \"Tả Phù\" theo iztro; \"Tả Phụ\" là cách đọc khác, không dùng"
+  },
+  {
+   "zh": "地劫",
+   "vi": "Địa Kiếp",
+   "category": "sát tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "地空",
+   "vi": "Địa Không",
+   "category": "sát tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "火星",
+   "vi": "Hỏa Tinh",
+   "category": "sát tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "铃星",
+   "vi": "Linh Tinh",
+   "category": "sát tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "擎羊",
+   "vi": "Kình Dương",
+   "category": "sát tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "陀罗",
+   "vi": "Đà La",
+   "category": "sát tinh",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "八座",
+   "vi": "Bát Tọa",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "大耗",
+   "vi": "Đại Hao",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "恩光",
+   "vi": "Ân Quang",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "蜚廉",
+   "vi": "Phi Liêm",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "封诰",
+   "vi": "Phong Cáo",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "凤阁",
+   "vi": "Phụng Các",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "副截",
+   "vi": "Phó Triệt",
+   "category": "tạp diệu",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "副旬",
+   "vi": "Phó Tuần",
+   "category": "tạp diệu",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "孤辰",
+   "vi": "Cô Thần",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "寡宿",
+   "vi": "Quả Tú",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "红鸾",
+   "vi": "Hồng Loan",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "华盖",
+   "vi": "Hoa Cái",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "劫煞",
+   "vi": "Kiếp Sát",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "截空",
+   "vi": "Triệt",
+   "category": "tạp diệu",
+   "source": "TuVi AI curated",
+   "note": "ghi đè iztro \"Triệt Không\""
+  },
+  {
+   "zh": "解神",
+   "vi": "Giải Thần",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "龙池",
+   "vi": "Long Trì",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "龙德",
+   "vi": "Long Đức",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "年解",
+   "vi": "Niên Giải",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "破碎",
+   "vi": "Phá Toái",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "三台",
+   "vi": "Tam Thai",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "台辅",
+   "vi": "Đài Phụ",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天才",
+   "vi": "Thiên Tài",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天厨",
+   "vi": "Thiên Trù",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天德",
+   "vi": "Thiên Đức",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天福",
+   "vi": "Thiên Phúc",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)",
+   "note": "Thiên Phúc — sao khác với Thiên Phủ (天府); không phải biến thể"
+  },
+  {
+   "zh": "天官",
+   "vi": "Thiên Quan",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天贵",
+   "vi": "Thiên Quý",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天空",
+   "vi": "Thiên Không",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天哭",
+   "vi": "Thiên Khốc",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天伤",
+   "vi": "Thiên Thương",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天使",
+   "vi": "Thiên Sứ",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天寿",
+   "vi": "Thiên Thọ",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天巫",
+   "vi": "Thiên Vu",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天喜",
+   "vi": "Thiên Hỷ",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天刑",
+   "vi": "Thiên Hình",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天虚",
+   "vi": "Thiên Hư",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天姚",
+   "vi": "Thiên Diêu",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天月",
+   "vi": "Thiên Nguyệt",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "咸池",
+   "vi": "Hàm Trì",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "旬空",
+   "vi": "Tuần",
+   "category": "tạp diệu",
+   "source": "TuVi AI curated",
+   "note": "ghi đè iztro \"Tuần Không\""
+  },
+  {
+   "zh": "阴煞",
+   "vi": "Âm Sát",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "月德",
+   "vi": "Nguyệt Đức",
+   "category": "tạp diệu",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "白虎",
+   "vi": "Bạch Hổ",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "病",
+   "vi": "Bệnh",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "病符",
+   "vi": "Bệnh Phù",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "博士",
+   "vi": "Bác Sỹ",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "帝旺",
+   "vi": "Đế Vượng",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "吊客",
+   "vi": "Điếu Khách",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "飞廉",
+   "vi": "Phi Liêm",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "伏兵",
+   "vi": "Phục Binh",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "官符",
+   "vi": "Quan Phù",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "冠带",
+   "vi": "Quan Đới",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "贯索",
+   "vi": "Quán Tác",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "晦气",
+   "vi": "Hối Khí",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "将军",
+   "vi": "Tướng Quân",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "将星",
+   "vi": "Tướng Tinh",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "绝",
+   "vi": "Tuyệt",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "力士",
+   "vi": "Lực Sỹ",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "临官",
+   "vi": "Lâm Quan",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "沐浴",
+   "vi": "Mục Dục",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "墓",
+   "vi": "Mộ",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "攀鞍",
+   "vi": "Phan Án",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "青龙",
+   "vi": "Thanh Long",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "丧门",
+   "vi": "Tang Môn",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "衰",
+   "vi": "Suy",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "死",
+   "vi": "Tử",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "岁建",
+   "vi": "Tuế Kiện",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "岁破",
+   "vi": "Tuế Phá",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "岁驿",
+   "vi": "Tuế Dịch",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "胎",
+   "vi": "Thai",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天煞",
+   "vi": "Thiên Sát",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "亡神",
+   "vi": "Vong Thần",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "息神",
+   "vi": "Tức Thần",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "喜神",
+   "vi": "Hỷ Thần",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "小耗",
+   "vi": "Tiểu Hao",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "养",
+   "vi": "Dưỡng",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "月煞",
+   "vi": "Nguyệt Sát",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "灾煞",
+   "vi": "Tai Sát",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "长生",
+   "vi": "Trường Sinh",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "指背",
+   "vi": "Chỉ Bối",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "奏书",
+   "vi": "Tấu Thư",
+   "category": "vòng sao",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "财帛",
+   "vi": "Tài Bạch",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "夫妻",
+   "vi": "Phu Thê",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "福德",
+   "vi": "Phúc Đức",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "父母",
+   "vi": "Phụ Mẫu",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "官禄",
+   "vi": "Quan Lộc",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "疾厄",
+   "vi": "Tật Ách",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "交友",
+   "vi": "Nô Bộc",
+   "category": "cung",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "交友宫",
+   "vi": "Nô Bộc",
+   "category": "cung",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "命宫",
+   "vi": "Mệnh",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "仆役",
+   "vi": "Nô Bộc",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "迁移",
+   "vi": "Thiên Di",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "身宫",
+   "vi": "Thân",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "田宅",
+   "vi": "Điền Trạch",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "兄弟",
+   "vi": "Huynh Đệ",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "子女",
+   "vi": "Tử Nữ",
+   "category": "cung",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "丙",
+   "vi": "Bính",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "丁",
+   "vi": "Đinh",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "庚",
+   "vi": "Canh",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "癸",
+   "vi": "Quý",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "己",
+   "vi": "Kỷ",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "甲",
+   "vi": "Giáp",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "壬",
+   "vi": "Nhâm",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "戊",
+   "vi": "Mậu",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "辛",
+   "vi": "Tân",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "乙",
+   "vi": "Ất",
+   "category": "thiên can",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "辰",
+   "vi": "Thìn",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "丑",
+   "vi": "Sửu",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "亥",
+   "vi": "Hợi",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "卯",
+   "vi": "Mão",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "申",
+   "vi": "Thân",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "巳",
+   "vi": "Tỵ",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "未",
+   "vi": "Mùi",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "午",
+   "vi": "Ngọ",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "戌",
+   "vi": "Tuất",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "寅",
+   "vi": "Dần",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "酉",
+   "vi": "Dậu",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "子",
+   "vi": "Tý",
+   "category": "địa chi",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "飞化",
+   "vi": "Phi Hóa",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "化忌",
+   "vi": "Hóa Kỵ",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "化科",
+   "vi": "Hóa Khoa",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "化禄",
+   "vi": "Hóa Lộc",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "化权",
+   "vi": "Hóa Quyền",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "忌",
+   "vi": "Kỵ",
+   "category": "tứ hóa",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "科",
+   "vi": "Khoa",
+   "category": "tứ hóa",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "禄",
+   "vi": "Lộc",
+   "category": "tứ hóa",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "权",
+   "vi": "Quyền",
+   "category": "tứ hóa",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "四化",
+   "vi": "Tứ Hóa",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "自化",
+   "vi": "Tự Hóa",
+   "category": "tứ hóa",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "不",
+   "vi": "Bất",
+   "category": "độ sáng",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "得",
+   "vi": "Đắc",
+   "category": "độ sáng",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "地",
+   "vi": "Địa",
+   "category": "độ sáng",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "利",
+   "vi": "Lợi",
+   "category": "độ sáng",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "落陷",
+   "vi": "Hãm Địa",
+   "category": "độ sáng",
+   "source": "TuVi AI curated",
+   "note": "lib/server/translate.ts EXTRA_TERMS ghi \"Hãm địa\" (chữ thường) — cùng thuật ngữ"
+  },
+  {
+   "zh": "庙",
+   "vi": "Miếu",
+   "category": "độ sáng",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "庙旺",
+   "vi": "Miếu Vượng",
+   "category": "độ sáng",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "平",
+   "vi": "Bình",
+   "category": "độ sáng",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "旺",
+   "vi": "Vượng",
+   "category": "độ sáng",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "闲",
+   "vi": "Nhàn",
+   "category": "độ sáng",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "陷",
+   "vi": "Hãm",
+   "category": "độ sáng",
+   "source": "TuVi AI curated",
+   "note": "ghi đè iztro \"Hạn\""
+  },
+  {
+   "zh": "火六局",
+   "vi": "Hỏa Lục Cục",
+   "category": "cục",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "金四局",
+   "vi": "Kim Tứ Cục",
+   "category": "cục",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "木三局",
+   "vi": "Mộc Tam Cục",
+   "category": "cục",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "水二局",
+   "vi": "Thủy Nhị Cục",
+   "category": "cục",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "土五局",
+   "vi": "Thổ Ngũ Cục",
+   "category": "cục",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "本命",
+   "vi": "Bản Mệnh",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "大限",
+   "vi": "Đại Hạn",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "对宫",
+   "vi": "Đối Cung",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "辅星",
+   "vi": "Phụ Tinh",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "格局",
+   "vi": "Cách Cục",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "宫",
+   "vi": "Cung",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "合盘",
+   "vi": "Hợp Hôn",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "空宫",
+   "vi": "Vô Chính Diệu",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "空亡",
+   "vi": "Không Vong",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "来因",
+   "vi": "Lai Nhân",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "流年",
+   "vi": "Lưu Niên",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "流日",
+   "vi": "Lưu Nhật",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "流时",
+   "vi": "Lưu Thì",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "流月",
+   "vi": "Lưu Nguyệt",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "命盘",
+   "vi": "Lá số",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "命主",
+   "vi": "Mệnh Chủ",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "三方四正",
+   "vi": "Tam Phương Tứ Chính",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "煞星",
+   "vi": "Sát Tinh",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "身主",
+   "vi": "Thân Chủ",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "时辰",
+   "vi": "Giờ (canh giờ)",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "童限",
+   "vi": "Đồng Hạn",
+   "category": "khái niệm",
+   "source": "TuVi AI curated",
+   "note": "ghi đè iztro \"đứa trẻ Hạn\""
+  },
+  {
+   "zh": "晚子时",
+   "vi": "Giờ Tý muộn",
+   "category": "khái niệm",
+   "source": "TuVi AI curated",
+   "note": "ghi đè iztro \"Giờ tý muộn\""
+  },
+  {
+   "zh": "五行局",
+   "vi": "Ngũ Hành Cục",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "小限",
+   "vi": "Tiểu Hạn",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "旬中",
+   "vi": "Tuần Trung",
+   "category": "khái niệm",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "阳男",
+   "vi": "Dương Nam",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "阳女",
+   "vi": "Dương Nữ",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "阴男",
+   "vi": "Âm Nam",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "阴女",
+   "vi": "Âm Nữ",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "杂曜",
+   "vi": "Tạp Diệu",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "早子时",
+   "vi": "Giờ Tý sớm",
+   "category": "khái niệm",
+   "source": "TuVi AI curated",
+   "note": "ghi đè iztro \"Giờ tý sớm\""
+  },
+  {
+   "zh": "真太阳时",
+   "vi": "Giờ Mặt Trời thực",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "主星",
+   "vi": "Chính Tinh",
+   "category": "khái niệm",
+   "source": "TuVi AI curated"
+  },
+  {
+   "zh": "白羊座",
+   "vi": "Cung Bạch Dương",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "辰时",
+   "vi": "Giờ thìn",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "丑时",
+   "vi": "Giờ sửu",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "处女座",
+   "vi": "Cung Xử Nữ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "狗",
+   "vi": "Chó",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "官府",
+   "vi": "Quan Phủ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "亥时",
+   "vi": "Giờ hợi",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "猴",
+   "vi": "Khỉ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "虎",
+   "vi": "Hổ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "鸡",
+   "vi": "Gà",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "劫杀",
+   "vi": "Kiếp Sát",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "截路",
+   "vi": "Triệt Lộ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "金牛座",
+   "vi": "Cung Kim Ngưu",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "巨蟹座",
+   "vi": "Cung Cự Giải",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "流昌",
+   "vi": "Lưu Xương",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流魁",
+   "vi": "Lưu Khôi",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流禄",
+   "vi": "Lưu Lộc",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流鸾",
+   "vi": "Lưu Loan",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流马",
+   "vi": "Lưu Mã",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流曲",
+   "vi": "Lưu Khúc",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流陀",
+   "vi": "Lưu Đà",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流喜",
+   "vi": "Lưu Hỷ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流羊",
+   "vi": "Lưu Dương",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "流钺",
+   "vi": "Lưu Việt",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "龙",
+   "vi": "Rồng",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "马",
+   "vi": "Ngựa",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "卯时",
+   "vi": "Giờ mão",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "摩羯座",
+   "vi": "Cung Ma Kết",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "男",
+   "vi": "Nam",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "牛",
+   "vi": "Trâu",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "女",
+   "vi": "Nữ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "日昌",
+   "vi": "Văn Xương(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日魁",
+   "vi": "Thiên Khôi(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日禄",
+   "vi": "Lộc Tồn(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日鸾",
+   "vi": "Hồng Loan(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日马",
+   "vi": "Thiên Mã(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日曲",
+   "vi": "Văn Khúc(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日陀",
+   "vi": "Đà La(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日喜",
+   "vi": "Thiên Hỷ(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日羊",
+   "vi": "Kình Dương(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "日钺",
+   "vi": "Thiên Nguyệt(d)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "iztro dịch nhầm 钺 thành \"Nguyệt\" (đúng là Thiên Việt); chỉ dùng cho sao lưu theo ngày, chưa hiển thị; sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "蛇",
+   "vi": "Rắn",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "射手座",
+   "vi": "Cung Xạ Thủ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "申时",
+   "vi": "Giờ thân",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "狮子座",
+   "vi": "Cung Sư Tử",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "时昌",
+   "vi": "Văn Xương(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时魁",
+   "vi": "Thiên Khôi(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时禄",
+   "vi": "Lộc Tồn(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时鸾",
+   "vi": "Hồng Loan(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时马",
+   "vi": "Thiên Mã(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时曲",
+   "vi": "Văn Khúc(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时陀",
+   "vi": "Đà La(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时喜",
+   "vi": "Thiên Hỷ(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时羊",
+   "vi": "Kình Dương(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "时钺",
+   "vi": "Thiên Nguyệt(H)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "iztro dịch nhầm 钺 thành \"Nguyệt\" (đúng là Thiên Việt); chưa hiển thị; sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "鼠",
+   "vi": "Chuột",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "双鱼座",
+   "vi": "Cung Song Ngư",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "双子座",
+   "vi": "Cung Song Tử",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "水瓶座",
+   "vi": "Cung Thủy Bình",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "巳时",
+   "vi": "Giờ tỵ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天秤座",
+   "vi": "Cung Thiên Bình",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "天蝎座",
+   "vi": "Cung Thiên Yết",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "兔",
+   "vi": "Mèo",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "未时",
+   "vi": "Giờ mùi",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "午时",
+   "vi": "Giờ ngọ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "戌时",
+   "vi": "Giờ tuất",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "羊",
+   "vi": "Dê",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "寅时",
+   "vi": "Giờ dần",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "酉时",
+   "vi": "Giờ dậu",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  },
+  {
+   "zh": "月昌",
+   "vi": "Văn Xương(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月魁",
+   "vi": "Thiên Khôi(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月禄",
+   "vi": "Lộc Tồn(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月鸾",
+   "vi": "Hồng Loan(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月马",
+   "vi": "Thiên Mã(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月曲",
+   "vi": "Văn Khúc(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月陀",
+   "vi": "Đà La(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月喜",
+   "vi": "Thiên Hỷ(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月羊",
+   "vi": "Kình Dương(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "月钺",
+   "vi": "Thiên Nguyệt(M)",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "iztro dịch nhầm 钺 thành \"Nguyệt\" (đúng là Thiên Việt); chưa hiển thị; sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运昌",
+   "vi": "Vận Xương",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运魁",
+   "vi": "Vận Khôi",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运禄",
+   "vi": "Vận Lộc",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运鸾",
+   "vi": "Vận Loan",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运马",
+   "vi": "Vận Mã",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运曲",
+   "vi": "Vận Khúc",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运陀",
+   "vi": "Vận Đà",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运喜",
+   "vi": "Vận Hỷ",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运羊",
+   "vi": "Vận Dương",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "运钺",
+   "vi": "Vận Việt",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)",
+   "note": "sao lưu/vận (iztro)"
+  },
+  {
+   "zh": "猪",
+   "vi": "Lợn",
+   "category": "khác",
+   "source": "iztro vi-VN (MIT)"
+  }
+ ],
+ "variants": [
+  {
+   "canonical": "Hóa Kỵ",
+   "variants": [
+    "Hóa Kị",
+    "Hoá Kị",
+    "Hoá Kỵ",
+    "Hóa Kì"
+   ],
+   "reason": "lỗi: 忌 đọc là Kỵ; \"Kị\" là dạng i/y cũ, \"Hoá\" là bỏ dấu kiểu cũ"
+  },
+  {
+   "canonical": "Hóa",
+   "variants": [
+    "Hoá"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới (Hóa, không Hoá)"
+  },
+  {
+   "canonical": "hóa",
+   "variants": [
+    "hoá"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới (hóa, không hoá)"
+  },
+  {
+   "canonical": "Hỏa",
+   "variants": [
+    "Hoả"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới (Hỏa Tinh, Hỏa Lục Cục)"
+  },
+  {
+   "canonical": "hỏa",
+   "variants": [
+    "hoả"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới"
+  },
+  {
+   "canonical": "Thủy",
+   "variants": [
+    "Thuỷ"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới (Thủy Nhị Cục)"
+  },
+  {
+   "canonical": "thủy",
+   "variants": [
+    "thuỷ"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới"
+  },
+  {
+   "canonical": "Tọa",
+   "variants": [
+    "Toạ"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới (Bát Tọa)"
+  },
+  {
+   "canonical": "tọa",
+   "variants": [
+    "toạ"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới (tọa thủ)"
+  },
+  {
+   "canonical": "Hòa",
+   "variants": [
+    "Hoà"
+   ],
+   "reason": "chính tả: bỏ dấu kiểu mới"
+  },
+  {
+   "canonical": "Quý",
+   "variants": [
+    "Quí"
+   ],
+   "reason": "chính tả: thiên can 癸 / Thiên Quý viết \"Quý\""
+  },
+  {
+   "canonical": "Kỷ",
+   "variants": [
+    "Kỉ"
+   ],
+   "reason": "chính tả: thiên can 己 viết \"Kỷ\""
+  },
+  {
+   "canonical": "Tỵ",
+   "variants": [
+    "Tị"
+   ],
+   "reason": "chính tả: địa chi 巳 thống nhất \"Tỵ\" (chữ hoa; \"tị nạn\" thường không bị bắt)"
+  },
+  {
+   "canonical": "Thất Sát",
+   "variants": [
+    "Thất Xát"
+   ],
+   "reason": "lỗi chính tả (七杀 = Sát)"
+  },
+  {
+   "canonical": "Liêm Trinh",
+   "variants": [
+    "Liêm Chinh",
+    "Liêm Chênh"
+   ],
+   "reason": "lỗi chính tả (廉贞 = Trinh)"
+  },
+  {
+   "canonical": "Cự Môn",
+   "variants": [
+    "Cự Mông"
+   ],
+   "reason": "lỗi chính tả (巨门 = Môn)"
+  },
+  {
+   "canonical": "Hữu Bật",
+   "variants": [
+    "Hữu Bậc"
+   ],
+   "reason": "lỗi chính tả (右弼 = Bật)"
+  },
+  {
+   "canonical": "Văn Xương",
+   "variants": [
+    "Văn Sương"
+   ],
+   "reason": "lỗi chính tả (文昌 = Xương)"
+  },
+  {
+   "canonical": "Tả Phù",
+   "variants": [
+    "Tả Phụ"
+   ],
+   "reason": "phong cách: thống nhất \"Tả Phù\" theo iztro"
+  },
+  {
+   "canonical": "Vũ Khúc",
+   "variants": [
+    "Võ Khúc"
+   ],
+   "reason": "phong cách: thống nhất \"Vũ Khúc\" (không dùng \"Võ Khúc\")"
+  },
+  {
+   "canonical": "Nô Bộc",
+   "variants": [
+    "Giao Hữu"
+   ],
+   "reason": "phong cách: cung 交友/仆役 thống nhất \"Nô Bộc\""
+  },
+  {
+   "canonical": "Tử Nữ",
+   "variants": [
+    "Tử Tức"
+   ],
+   "reason": "phong cách: cung 子女 thống nhất \"Tử Nữ\""
+  },
+  {
+   "canonical": "Phúc Đức",
+   "variants": [
+    "Phước Đức"
+   ],
+   "reason": "phong cách: thống nhất \"Phúc Đức\" (không dùng \"Phước Đức\")"
+  },
+  {
+   "canonical": "Hãm Địa",
+   "variants": [
+    "Hạn Địa",
+    "Hạn địa"
+   ],
+   "reason": "lỗi iztro: 陷 bị dịch \"Hạn\""
+  },
+  {
+   "canonical": "Đồng Hạn",
+   "variants": [
+    "đứa trẻ Hạn"
+   ],
+   "reason": "lỗi iztro: 童限 bị dịch \"đứa trẻ Hạn\""
+  }
+ ]
+}

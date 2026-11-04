@@ -4,7 +4,8 @@
  *
  * - Paragraph-level chunks (short chunks stop the model from "continuing" the source).
  * - Glossary terms present in the chunk are injected into the prompt and checked in the output.
- * - Validation: leftover Han outside parentheses, length ratio, missing glossary terms → one strict
+ * - Validation: leftover Han outside parentheses, length ratio, missing glossary terms, non-standard
+ *   spellings (findTermIssues) → one strict
  *   retry; if still failing the best attempt is returned with ok=false (UI labels it).
  * - Cache: data/cache/translations/<sha256>.json keyed by model + prompt version + source text.
  *   The dataset reuses snippets across charts heavily, so the hit rate is high.
@@ -13,6 +14,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { glossaryFor } from '@/lib/i18n/terms';
+import { findTermIssues } from '@/lib/i18n/terminology';
 import { complete, pickOllamaModel } from './ai/providers';
 
 const PROMPT_VERSION = 'tr-v1';
@@ -57,6 +59,9 @@ export function validateTranslation(zh: string, vi: string, glossary: string[]):
   const lower = vi.toLocaleLowerCase('vi');
   const missing = glossary.map(g => g.split(' = ')[1]).filter(v => v && !lower.includes(v.toLocaleLowerCase('vi')));
   if (missing.length) issues.push(`thiếu thuật ngữ: ${missing.slice(0, 5).join(', ')}`);
+  // Han is already checked above; add only non-standard spellings (lib/i18n/terminology.ts VARIANTS).
+  const variants = [...new Set(findTermIssues(vi).filter(i => i.kind === 'variant').map(i => `${i.found} → ${i.canonical}`))];
+  if (variants.length) issues.push(`thuật ngữ không chuẩn: ${variants.slice(0, 5).join(', ')}`);
   return issues;
 }
 
