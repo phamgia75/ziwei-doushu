@@ -68,9 +68,17 @@ export function substituteTerms(text: string): string {
   return out;
 }
 
-/** Glossary lines relevant to `text`, for prompting a translator. */
+/** Palace base names are ordinary words in prose (兄弟 = siblings); only enforce them as "X宫".
+ *  A few star names double as common words (天才 = genius). */
+const PALACE_BASES = ['兄弟', '夫妻', '子女', '财帛', '疾厄', '迁移', '交友', '仆役', '官禄', '田宅', '福德', '父母'];
+const PROSE_AMBIGUOUS = new Set([...PALACE_BASES, '天才', '天空', '天使', '天德', '月德', '天月', '天福', '天官', '三台']);
+const PALACE_TERMS = Object.fromEntries(PALACE_BASES.map(b => [`${b}宫`, `cung ${GLOSSARY[b]}`]));
+
+/** Glossary lines relevant to `text`, for prompting a translator (and checking its output). */
 export function glossaryFor(text: string): string[] {
-  return KEYS_BY_LENGTH.filter(k => text.includes(k)).map(k => `${k} = ${GLOSSARY[k]}`);
+  const palace = Object.entries(PALACE_TERMS).filter(([k]) => text.includes(k)).map(([k, v]) => `${k} = ${v}`);
+  const rest = KEYS_BY_LENGTH.filter(k => !PROSE_AMBIGUOUS.has(k) && text.includes(k)).map(k => `${k} = ${GLOSSARY[k]}`);
+  return [...palace, ...rest];
 }
 
 export function allTerms(): Readonly<Record<string, string>> {

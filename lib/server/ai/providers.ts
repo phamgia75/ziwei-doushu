@@ -94,7 +94,7 @@ export async function* streamChat(id: ProviderId, model: string, messages: ChatM
       const r = await fetch(`${OLLAMA_URL()}/api/chat`, {
         method: 'POST', signal: guard.signal, headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, stream: true, think: false, keep_alive: '30m',
-          options: { temperature, ...(opts.maxTokens ? { num_predict: opts.maxTokens } : {}) } }),
+          options: { temperature, num_ctx: Number(env('OLLAMA_NUM_CTX') ?? 16384), ...(opts.maxTokens ? { num_predict: opts.maxTokens } : {}) } }),
       });
       if (!r.ok || !r.body) throw new Error(`Ollama HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
       for await (const line of lines(r.body, guard.bump)) {
