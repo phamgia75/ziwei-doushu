@@ -23,3 +23,6 @@ for (let t = Date.UTC(1950, 0, 1); t <= Date.UTC(2026, 11, 31); t += 3 * 86_400_
   assert.deepEqual(convertSolar2Lunar(s.day, s.month, s.year, 8), convertSolar2Lunar(dd, m, y, 7), `${y}-${m}-${dd}`);
 }
 console.log(`vn calendar charting: Tết cases + ${mapped} sampled days mapped, ${missing} without a CN equivalent`);
+// /api/reading must look the dataset up by the remapped chart date (static check of the handler)
+import { readFileSync } from 'node:fs';
+assert.match(readFileSync('app/api/reading/route.ts', 'utf8'), /const cb = chart\.birthInfo;\s+const rec = await lookupRecord\(cb\.year/);

@@ -16,7 +16,9 @@ export async function POST(req: Request) {
     if (!DATASET_TOPICS.includes(topic)) throw new BadRequest('topic không hợp lệ');
     const translate = body.translate !== false;
     return sseResponse(async (send, signal) => {
-      const rec = await lookupRecord(birth.year, birth.month, birth.day, birth.hour, birth.gender);
+      // the chart date after options.calendar (VN calendar may remap it) — same key the chart was built from
+      const cb = chart.birthInfo;
+      const rec = await lookupRecord(cb.year, cb.month, cb.day, cb.hour, cb.gender);
       if (!rec) { send({ meta: { status: 'missing', note: 'Không có bản luận giải trong bộ dữ liệu (ngoài 1950–2026 hoặc chưa tải dữ liệu: npm run dataset:fetch).' } }); return; }
       const matches = recordMatchesChart(rec, chart);
       send({ meta: { status: matches ? 'ok' : 'mismatch', key: rec.k, topic, attribution: DATASET_ATTRIBUTION,

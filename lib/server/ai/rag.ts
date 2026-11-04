@@ -55,7 +55,8 @@ export async function datasetSources(chart: ZiweiChart, topics: DatasetTopic[], 
     sources: topics.filter(t => DATASET_TOPICS.includes(t)).map(t => ({
       origin: 'dataset' as const,
       title: `Bộ dữ liệu luận giải v4.0 — chủ đề ${t}`,
-      ref: `${DATASET_ATTRIBUTION.release} ${rec.k}#${t}`,
+      // rec.k encodes birth date/hour/gender — never put it in model-facing text
+      ref: `${DATASET_ATTRIBUTION.release}#${t}`,
       license: `${DATASET_ATTRIBUTION.license} — ${DATASET_ATTRIBUTION.author}`,
       text: clip(rec.c[t], Math.floor(maxChars / topics.length)),
     })),

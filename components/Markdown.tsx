@@ -10,7 +10,8 @@ function inline(text: string, onRef?: (id: string) => void, key = ''): ReactNode
   while ((m = re.exec(text))) {
     if (m.index > last) out.push(text.slice(last, m.index));
     const k = `${key}-${n++}`;
-    if (m[1]) out.push(<button key={k} type="button" className="tv-ref" onClick={() => onRef?.(m![1])} aria-label={`Xem ${m[1]}`}>{m[1]}</button>);
+    const ref = m[1]; // capture per match: `m` is null once the loop ends
+    if (ref) out.push(<button key={k} type="button" className="tv-ref" onClick={() => onRef?.(ref)} aria-label={`Xem ${ref}`}>{ref}</button>);
     else if (m[2]) out.push(<strong key={k}>{inline(m[2], onRef, k)}</strong>);
     else out.push(<em key={k}>{m[3] ?? m[4]}</em>);
     last = re.lastIndex;
