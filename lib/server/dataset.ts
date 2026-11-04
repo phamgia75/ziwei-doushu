@@ -56,8 +56,9 @@ export function readManifest(): { files: ManifestFile[]; contentVersion: string 
 
 /** Years whose file is present (checksum verified at fetch time; `verifyYear` re-checks). */
 export function availableYears(): number[] {
-  if (!existsSync(dir())) return [];
-  return readdirSync(dir()).map(f => /^year-(\d{4})\.jsonl\.zst$/.exec(f)?.[1]).filter(Boolean).map(Number).sort();
+  // data dir is runtime-configured (DATASET_DIR); not part of the build output
+  if (!existsSync(/*turbopackIgnore: true*/ dir())) return [];
+  return readdirSync(/*turbopackIgnore: true*/ dir()).map(f => /^year-(\d{4})\.jsonl\.zst$/.exec(f)?.[1]).filter(Boolean).map(Number).sort();
 }
 
 export function verifyYear(year: number): boolean {
