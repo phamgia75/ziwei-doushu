@@ -1,0 +1,48 @@
+{
+  "exclude": [
+    "package-lock.json",
+    "lib/i18n/glossary.iztro.json",
+    "lib/ziwei/school-tables.generated.ts",
+    "tests/fixtures/**",
+    "docs/tianji-ziwei/**",
+    "lib/classics/data/**",
+    "next-env.d.ts"
+  ],
+  "rules": [
+    {
+      "path": "lib/ziwei/share.ts",
+      "rule": "Birth-form → chart-date conversion. With utcOffsetMinutes omitted the result must equal upstream (Beijing, meridian 120°). Meridian = utcOffsetMinutes/4. Late Tý (true solar ≥ 23:00) shifts the chart date only under lateZishi 'next-day'. Equation of time is added only when equationOfTime is true AND a birthplace is set. BirthForm must keep calling formToBirthInfo (regression test enforces it).",
+      "merge_system_rule": true
+    },
+    {
+      "path": "lib/ziwei/**",
+      "rule": "Upstream chart engine. TuVi AI must not change calculation logic or the Chinese identifiers (star/palace names are keys). Any diff here needs a demonstrated defect plus a regression test; golden fixtures in tests/fixtures/golden-charts.json must still match.",
+      "merge_system_rule": true
+    },
+    {
+      "path": "lib/calendar/**",
+      "rule": "Lunar calendar (Hồ Ngọc Đức algorithm, timeZone 7 = Vietnam, 8 = China). convertSolar2Lunar(·, 8) must match lunar-javascript for 1950–2026. applyCalendar must be applied exactly once per chart (client sends pre-convention birth fields; server applies options.calendar).",
+      "merge_system_rule": true
+    },
+    {
+      "path": "lib/geo/**",
+      "rule": "Historical UTC offsets for Vietnamese birthplaces: south of 17°N follows IANA Asia/Ho_Chi_Minh (+8 1960-01-01..1975-06-13), north +7 from 1945-09-02. Wall-clock time is local; check boundary minutes.",
+      "merge_system_rule": true
+    },
+    {
+      "path": "lib/server/**",
+      "rule": "Privacy and AI safety boundary. Charts sent to an LLM must be regenerated server-side from validated {year,month,day,hour,gender} only; facts must not contain name, birth date or birthplace. External providers (openai/anthropic) only when AI_ALLOW_EXTERNAL=true + key + explicitly requested; translation always local. Untrusted text (questions, history) is sanitized of DELIMS and kept inside the question block. Never log or return API keys. Dataset/translation caches stay under data/ (gitignored).",
+      "merge_system_rule": true
+    },
+    {
+      "path": "app/api/**",
+      "rule": "Local-only API. Every handler must call guardRequest (Host allow-list + same Origin) first and validate input with lib/server/http.ts helpers; reject non-JSON bodies; errors return Vietnamese messages without stack traces. SSE streams must always end with data: [DONE]. Keep the upstream client shapes ({chart}, {chartA, chartB}) accepted but use only birthInfo from them.",
+      "merge_system_rule": true
+    },
+    {
+      "path": "lib/client/**",
+      "rule": "Browser storage of personal birth data: only on explicit save; every localStorage access wrapped in try/catch; imports validated record-by-record; URLs carry only saved-chart ids, never birth data; external provider only with externalConsent.",
+      "merge_system_rule": true
+    }
+  ]
+}
