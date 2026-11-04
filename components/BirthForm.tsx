@@ -122,7 +122,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
   const solarMins = ((hh * 60 + mm + (eff.longitude - offsetUsed / 4) * 4) % 1440 + 1440) % 1440;
   const solarClock = `${pad2(Math.floor(Math.round(solarMins) / 60) % 24)}:${pad2(Math.round(solarMins) % 60)}`;
 
-  const chartInfo = useMemo(() => (dateValid ? formToBirthInfo(eff, { lateZishi }) : null), [eff, lateZishi, dateValid]);
+  const chartInfo = useMemo(() => (dateValid ? formToBirthInfo(eff, { lateZishi, equationOfTime }) : null), [eff, lateZishi, equationOfTime, dateValid]);
   const ziHint = (() => {
     if (form.unknownTime || !chartInfo || branch !== 0) return null;
     const late = solarMins >= 1380;

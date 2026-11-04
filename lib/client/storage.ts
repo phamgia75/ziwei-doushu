@@ -59,8 +59,15 @@ export function clearAllLocal(): void {
 
 function isSavedChart(c: unknown): c is SavedChart {
   const o = c as SavedChart;
-  return !!o && typeof o.id === 'string' && typeof o.label === 'string' && !!o.form && typeof o.form.year === 'string'
-    && typeof o.form.month === 'string' && typeof o.form.day === 'string' && (o.form.gender === 'male' || o.form.gender === 'female');
+  const f = o?.form;
+  const intStr = (v: unknown, min: number, max: number) => typeof v === 'string' && /^\d{1,4}$/.test(v) && +v >= min && +v <= max;
+  return !!o && typeof o.id === 'string' && o.id.length <= 64 && typeof o.label === 'string' && !!f
+    && intStr(f.year, 1901, 2049) && intStr(f.month, 1, 12) && intStr(f.day, 1, 31)
+    && intStr(f.clockHour, 0, 23) && intStr(f.clockMinute, 0, 59) && typeof f.unknownTime === 'boolean'
+    && typeof f.name === 'string' && typeof f.province === 'string' && typeof f.city === 'string'
+    && typeof f.longitude === 'number' && Number.isFinite(f.longitude) && Math.abs(f.longitude) <= 180
+    && (f.utcOffsetMinutes === undefined || (typeof f.utcOffsetMinutes === 'number' && Math.abs(f.utcOffsetMinutes) <= 14 * 60))
+    && (f.gender === 'male' || f.gender === 'female');
 }
 
 export function exportAll(): string {

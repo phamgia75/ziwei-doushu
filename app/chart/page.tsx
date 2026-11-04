@@ -54,7 +54,9 @@ function Workspace() {
 
   const open = useCallback((f: BirthFormState, info: BirthInfo, id?: string) => {
     const s = loadSettings();
-    setSettings(s); setForm(f); setSavedId(id); setBaseInfo(info); setChart(buildChart(info, s));
+    let c: ZiweiChart;
+    try { c = buildChart(info, s); } catch { setFlash(common.errors.invalidDate); return; } // e.g. corrupt saved record
+    setSettings(s); setForm(f); setSavedId(id); setBaseInfo(info); setChart(c);
     setEditing(false); setPalace(null); setStar(null); setTab('topics'); setExtra(null);
   }, []);
 
@@ -91,6 +93,7 @@ function Workspace() {
       <main className="page-main">
         <h1 style={{ fontSize: 26, fontWeight: 700, marginBottom: 6 }}>{P.title}</h1>
         <p className="tv-note" style={{ marginBottom: 20 }}>{P.intro}</p>
+        {flash && <div className="tv-warn" role="alert" style={{ marginBottom: 12 }}>{flash}</div>}
         <BirthForm
           initialData={editing ? form ?? undefined : undefined}
           lateZishi={settings.lateZishi}

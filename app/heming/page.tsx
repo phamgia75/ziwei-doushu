@@ -82,7 +82,8 @@ export default function HemingPage() {
   const fetch = useCallback((url: string, init: RequestInit) => window.fetch(url, {
     ...init,
     // birthA/birthB = birth fields before the calendar convention (the server applies options.calendar once)
-    body: JSON.stringify({ ...JSON.parse(String(init.body)), relation, provider: requestProvider(settings),
+    // only birth fields leave the page (the upstream body also carried full charts incl. names)
+    body: JSON.stringify({ question: JSON.parse(String(init.body)).question, relation, provider: requestProvider(settings),
       ...(formA && formB ? { birthA: birthPayload(formToBirthInfo(formA)), birthB: birthPayload(formToBirthInfo(formB)) } : {}),
       options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar } }),
   }), [relation, settings, formA, formB, formToBirthInfo]);

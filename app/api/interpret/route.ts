@@ -4,6 +4,7 @@ import { parseHistory } from '@/lib/server/ai/guard';
 import { resolveProvider } from '@/lib/server/ai/providers';
 import { TOPIC_KEYS } from '@/lib/i18n/vi/topics';
 import { chartPatternsVi } from '@/lib/server/patterns';
+import { hasTerm } from '@/lib/i18n/terms';
 
 export const dynamic = 'force-dynamic';
 const MODES: Mode[] = ['overview', 'topic', 'palace', 'star', 'cycle', 'chat'];
@@ -18,7 +19,8 @@ export async function POST(req: Request) {
     if (!MODES.includes(mode)) throw new BadRequest('mode không hợp lệ');
     if (mode === 'topic' && !TOPIC_KEYS.includes(body.topic as never)) throw new BadRequest('topic không hợp lệ');
     if (mode === 'palace' && !(Number.isInteger(body.palaceBranch) && (body.palaceBranch as number) >= 0 && (body.palaceBranch as number) < 12)) throw new BadRequest('palaceBranch không hợp lệ');
-    if (mode === 'star' && (typeof body.starName !== 'string' || body.starName.length > 8)) throw new BadRequest('starName không hợp lệ');
+    // only known engine star names reach the prompt (no free text)
+    if (mode === 'star' && (typeof body.starName !== 'string' || body.starName.length > 8 || !/^\p{Script=Han}+$/u.test(body.starName) || !hasTerm(body.starName))) throw new BadRequest('starName không hợp lệ');
     if (mode === 'chat' && (typeof body.question !== 'string' || !body.question.trim())) throw new BadRequest('Thiếu câu hỏi');
     const year = body.year === undefined ? undefined : Number.isInteger(body.year) && (body.year as number) > 1900 && (body.year as number) < 2101 ? body.year as number : (() => { throw new BadRequest('year không hợp lệ'); })();
     let history;

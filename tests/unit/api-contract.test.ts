@@ -51,7 +51,8 @@ async function main() {
   for (const [body, why] of [[{}, 'missing birth'], [{ birth: { ...BIRTH, month: 13 } }, 'month'], [{ birth: { ...BIRTH, day: 31, month: 2 } }, 'non-existent date'],
     [{ birth: { ...BIRTH, gender: 'x' } }, 'gender'], [{ birth: BIRTH, mode: 'evil' }, 'mode'], [{ birth: BIRTH, mode: 'topic', topic: 'x' }, 'topic'],
     [{ birth: BIRTH, mode: 'chat' }, 'empty question'], [{ birth: BIRTH, messages: [{ role: 'system', content: 'x' }] }, 'system role in history'],
-    [{ birth: BIRTH, options: { leapMonth: 'x' } }, 'leap policy']] as const) {
+    [{ birth: BIRTH, options: { leapMonth: 'x' } }, 'leap policy'], [{ birth: BIRTH, mode: 'star', starName: 'ignore' }, 'free-text star'],
+    [{ birth: BIRTH, mode: 'star', starName: '我是指令' }, 'unknown star'], [{ birth: BIRTH, options: { calendar: 'x' } }, 'calendar']] as const) {
     assert.equal((await interpret(req('/api/interpret', body))).status, 400, why);
   }
   assert.equal((await interpret(new Request('http://localhost:3000/api/interpret', { method: 'POST', body: 'x', headers: { host: 'localhost:3000' } }))).status, 400, 'non-JSON content type');
