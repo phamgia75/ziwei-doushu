@@ -43,6 +43,7 @@ interface Model {
   daxian: Map<string, Set<string>>;           // sihua word → stars (any Đại Hạn; current first)
   daxianCurrent: Map<string, string>;
   daxianByAge: Map<number, Map<string, string>>; // Đại Hạn startAge → sihua word → star
+  daxianEnd: Map<number, number>;
   liunian: Map<string, string>;
   self: Map<string, Set<string>>;             // sihua word → stars with Tự Hóa
   starRe: RegExp; palaceRe: RegExp;
@@ -60,11 +61,11 @@ function buildModel(chart: ZiweiChart, year: number, label?: 'A' | 'B'): Model {
     for (const x of p.selfSihua ?? []) { const k = zh2vi(x.siHua); (self.get(k) ?? self.set(k, new Set()).get(k)!).add(term(x.starName)); }
   }
   const daxian = new Map<string, Set<string>>(), daxianCurrent = new Map<string, string>(), liunian = new Map<string, string>();
-  const daxianByAge = new Map<number, Map<string, string>>();
+  const daxianByAge = new Map<number, Map<string, string>>(), daxianEnd = new Map<number, number>();
   chart.daXians.forEach((_, i) => {
     const sh = getDaXianSiHua(chart, i); if (!sh) return;
     const byHua = new Map<string, string>();
-    daxianByAge.set(chart.daXians[i].startAge, byHua);
+    daxianByAge.set(chart.daXians[i].startAge, byHua); daxianEnd.set(chart.daXians[i].startAge, chart.daXians[i].endAge);
     for (const [h, star] of Object.entries(sh.transforms)) {
       const k = zh2vi(h); byHua.set(k, term(star)); (daxian.get(k) ?? daxian.set(k, new Set()).get(k)!).add(term(star));
       if (i === chart.currentDaXianIndex) daxianCurrent.set(k, term(star));
@@ -74,7 +75,7 @@ function buildModel(chart: ZiweiChart, year: number, label?: 'A' | 'B'): Model {
   const stars = [...starBranch.keys()].sort((a, b) => b.length - a.length);
   const palaces = [...new Set(chart.palaces.map(p => term(p.name)))];
   return {
-    label, year, daxianByAge, starBranch, starBright, mingZhu: term(chart.mingZhu), shenZhu: term(chart.shenZhu),
+    label, year, daxianByAge, daxianEnd, starBranch, starBright, mingZhu: term(chart.mingZhu), shenZhu: term(chart.shenZhu),
     shenPalace: term(chart.palaces.find(p => p.branch === chart.shenGongBranch)?.name), palaceBranch, palaceByBranch, natal, daxian, daxianCurrent, liunian, self,
     starRe: new RegExp(`${word(stars)}(?! Đẩu)`, 'gu'),
     // "cung X" always; bare multi-word palace names too (bare "Mệnh"/"Thân" are too ambiguous)
@@ -103,7 +104,13 @@ function sihuaScope(m: Model, s: string): SihuaScope {
   }
   if (/đại hạn|đại vận/iu.test(s)) {
     const ages = s.match(/(\d{1,3})\s*[–-]\s*(\d{1,3})/u);
-    if (ages && m.daxianByAge.has(Number(ages[1]))) return { kind: 'daxian-at', label: `Đại Hạn ${ages[1]}–${ages[2]}`, map: m.daxianByAge.get(Number(ages[1])) };
+    if (ages) {
+      const [a, b] = [Number(ages[1]), Number(ages[2])];
+      const at = m.daxianByAge.get(a);
+      // an explicit decade that is not one of this chart's Đại Hạn can't be verified (never fall back to the current one)
+      if (!at || m.daxianEnd.get(a) !== b) return { kind: 'daxian-any', label: `Đại Hạn ${a}–${b} (không có trên lá số)`, map: new Map() };
+      return { kind: 'daxian-at', label: `Đại Hạn ${a}–${b}`, map: at };
+    }
     if (/hiện tại|này|đang|hiện nay/iu.test(s)) return { kind: 'daxian-current', label: 'Đại Hạn hiện tại', map: m.daxianCurrent };
     return { kind: 'daxian-any', label: 'Đại Hạn (không rõ đại hạn nào)', map: m.daxianCurrent };
   }

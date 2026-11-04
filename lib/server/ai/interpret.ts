@@ -143,9 +143,11 @@ export async function streamWithFallback(provider: ProviderId, messages: ChatMes
   const key = firstModel ? answerKey(provider, firstModel, messages) : '';
   const hit = key ? readAnswer(key) : null;
   if (hit) {
+    // re-validate with the CURRENT verifier (cached text predates any verifier fix)
+    const rep = validateOutput(hit.text, charts.length === 1 ? charts[0] : charts, facts.map(f => f.id), sources.map(s => s.id), year);
     send({ meta: { ...startMeta(provider, firstModel), cached: true } });
-    send({ delta: { text: hit.text } });
-    send({ meta: { phase: 'end', validation: hit.validation, cached: true, perf: { totalMs: Date.now() - t0, cached: true } } });
+    send({ delta: { text: hit.text + validationNote(rep) } });
+    send({ meta: { phase: 'end', validation: rep, cached: true, perf: { totalMs: Date.now() - t0, cached: true } } });
     return;
   }
   const tryOrder: ProviderId[] = provider === 'ollama' ? ['ollama'] : [provider, 'ollama'];
@@ -191,5 +193,5 @@ export async function streamWithFallback(provider: ProviderId, messages: ChatMes
   const perf = { totalMs: Date.now() - t0, ttftMs, ...stats };
   console.log(`[ai] ${used.provider}/${used.model} ${JSON.stringify(perf)}`);
   send({ meta: { phase: 'end', validation: report, perf } });
-  if (complete && used.provider === provider && key) writeAnswer(key, { text: text + note, validation: report });
+  if (complete && used.provider === provider && key) writeAnswer(key, { text });
 }

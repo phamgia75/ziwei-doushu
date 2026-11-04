@@ -127,3 +127,7 @@ async function main() {
   console.log('api contract: validation, guards, determinism, traceability, injection, privacy, fallback — 10 groups pass');
 }
 main().catch(e => { console.error(e); process.exit(1); });
+// cached answers are re-validated with the current verifier on replay (raw text only is stored)
+import { readFileSync as rf } from 'node:fs';
+const src = rf('lib/server/ai/interpret.ts', 'utf8');
+if (!/const rep = validateOutput\(hit\.text/.test(src) || /writeAnswer\(key, \{ text: text \+ note/.test(src)) { console.error('answer cache must store raw text and re-validate on hit'); process.exit(1); }

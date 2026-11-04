@@ -52,6 +52,8 @@ one('Đại Hạn hiện tại Tham Lang Hóa Kỵ.', 'sihua-star', 'contradicte
 one('Đại Hạn Tham Lang Hóa Kỵ.', 'sihua-star', 'unverified');           // which decade? (true in 16–25 only)
 one('Đại Hạn 16–25 Tham Lang Hóa Kỵ.', 'sihua-star', 'verified');
 one('Đại Hạn 36–45 Tham Lang Hóa Kỵ.', 'sihua-star', 'contradicted');
+one('Đại Hạn 17–26 Văn Xương Hóa Kỵ.', 'sihua-star', 'unverified'); // no such decade on this chart → never 'verified'
+assert.ok(run('Đại Hạn 17–26 Văn Xương Hóa Kỵ.').every(c => c.status !== 'verified'));
 one('Năm 2024 Liêm Trinh Hóa Kỵ.', 'sihua-star', 'contradicted');       // 2024 Giáp: Kỵ Thái Dương
 one('Năm 2024 Thái Dương Hóa Kỵ.', 'sihua-star', 'verified');
 // doctrine / hypotheticals are not claims about this chart

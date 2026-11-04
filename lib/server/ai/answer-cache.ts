@@ -7,19 +7,19 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync, rmSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import type { ChatMessage } from './providers';
-import type { ValidationReport } from './validate';
 
-const VERSION = 'ans-v2'; // bump when prompts/validation change
+const VERSION = 'ans-v3'; // bump when prompts change; validation is re-run on every hit
 const dir = () => join(process.cwd(), 'data/cache/answers');
 export const answerKey = (provider: string, model: string, messages: ChatMessage[]) =>
   createHash('sha256').update(JSON.stringify([VERSION, provider, model, messages])).digest('hex');
 
-export function readAnswer(key: string): { text: string; validation: ValidationReport } | null {
+export function readAnswer(key: string): { text: string } | null {
   if (process.env.AI_ANSWER_CACHE === 'off') return null;
   const f = join(dir(), `${key}.json`);
   try { return existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : null; } catch { return null; }
 }
-export function writeAnswer(key: string, v: { text: string; validation: ValidationReport }): void {
+/** Stores the RAW model text only; validation is recomputed with the current verifier on replay. */
+export function writeAnswer(key: string, v: { text: string }): void {
   if (process.env.AI_ANSWER_CACHE === 'off') return;
   try { mkdirSync(dir(), { recursive: true }); writeFileSync(join(dir(), `${key}.json`), JSON.stringify(v)); } catch { /* cache is best-effort */ }
 }
