@@ -7,3 +7,10 @@ dist/
 *.tsbuildinfo
 .DS_Store
 node_modules
+# TuVi AI local data (downloaded datasets, caches, personal data never committed)
+/data/
+/.orca/
+/test-results/
+/playwright-report/
+.tuvi-server.pid
+*.log

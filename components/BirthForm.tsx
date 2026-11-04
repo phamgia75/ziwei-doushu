@@ -18,6 +18,8 @@ export interface BirthFormState {
   province: string;
   city: string;
   longitude: number;
+  /** Standard UTC offset (minutes) of the clock time entered. Omitted = 480 (Beijing, upstream default). */
+  utcOffsetMinutes?: number;
   gender: 'male' | 'female';
 }
 
