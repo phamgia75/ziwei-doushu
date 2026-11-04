@@ -26,3 +26,16 @@ console.log(`vn calendar charting: Tết cases + ${mapped} sampled days mapped, 
 // /api/reading must look the dataset up by the remapped chart date (static check of the handler)
 import { readFileSync } from 'node:fs';
 assert.match(readFileSync('app/api/reading/route.ts', 'utf8'), /const cb = chart\.birthInfo;\s+const rec = await lookupRecord\(cb\.year/);
+// historical rule: the Vietnamese calendar used UTC+8 before 1968 (whole country) and in the South until 1975
+import { vnCalendarTz, vnCalendarDiff } from '../../lib/calendar/vn-chart';
+assert.equal(vnCalendarTz(1965, 2, 1, 'north'), 8);
+assert.equal(vnCalendarTz(1968, 1, 29, 'north'), 7);
+assert.equal(vnCalendarTz(1968, 1, 30, 'south'), 8);
+assert.equal(vnCalendarTz(1976, 1, 31, 'south'), 7);
+assert.equal(vnCalendarDiff(1965, 2, 1, 'north').differs, false, 'pre-1968: VN = CN calendar, no warning');
+assert.equal(applyCalendar({ year: 1965, month: 2, day: 1 }, 'vn').remapped, false);
+const north68 = generateChart(applyCalendar({ year: 1968, month: 1, day: 29, hour: 6, gender: 'male' as const }, 'vn', 'north').info);
+assert.deepEqual([north68.lunarInfo.lunarMonth, north68.lunarInfo.lunarDay], [1, 1], 'Hà Nội: Tết 1968 = Jan 29');
+const south68 = generateChart(applyCalendar({ year: 1968, month: 1, day: 30, hour: 6, gender: 'male' as const }, 'vn', 'south').info);
+assert.deepEqual([south68.lunarInfo.lunarMonth, south68.lunarInfo.lunarDay], [1, 1], 'Huế/Sài Gòn: Tết 1968 = Jan 30');
+console.log('vn calendar historical rule (pre-1968 UTC+8, South UTC+8 until 1975) pass');

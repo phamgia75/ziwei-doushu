@@ -82,7 +82,7 @@ export function runVnCase(c: VnCase) {
   const utcOffsetMinutes = vnUtcOffsetMinutes(city.lat, y, m, d, hh, mm); // as BirthForm does
   const b = formToBirthInfo({ name: '', year: String(y), month: String(m), day: String(d), clockHour: String(hh), clockMinute: String(mm), unknownTime: false,
     province: c.province, city: c.city, longitude: city.longitude, utcOffsetMinutes, gender: c.gender }, { lateZishi: c.lateZishi, equationOfTime: c.eot });
-  const cal = applyCalendar(b, c.calendar);
+  const cal = applyCalendar(b, c.calendar, city.lat < 17 ? 'south' : 'north'); // historical VN calendar rule by region
   const chart = generateChart(cal.info);
   const ymd = (x: { year: number; month: number; day: number }) => `${x.year}-${String(x.month).padStart(2, '0')}-${String(x.day).padStart(2, '0')}`;
   const major: Record<string, number> = {}, sihua: Record<string, string> = {};
@@ -93,7 +93,7 @@ export function runVnCase(c: VnCase) {
   const L = chart.lunarInfo;
   return {
     utcOffsetMinutes, chartDate: ymd(b), engineDate: ymd(chart.birthInfo), remapped: cal.remapped, unavailable: cal.unavailable,
-    hour: chart.birthInfo.hour, lunar: [L.lunarYear, L.lunarMonth, L.lunarDay, L.isLeapMonth], yearPillar: L.fourPillars[0],
+    hour: chart.birthInfo.hour, lunar: [L.lunarYear, L.lunarMonth, L.lunarDay, L.isLeapMonth], yearPillar: L.fourPillars?.[0],
     ming: chart.mingGongBranch, shen: chart.shenGongBranch, ju: chart.wuxingJu, major, sihua,
   };
 }

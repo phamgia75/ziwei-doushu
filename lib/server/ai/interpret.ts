@@ -28,6 +28,7 @@ export interface InterpretInput {
   history?: HistoryMsg[];
   provider: ProviderId;
   patterns?: string[];
+  calendarNote?: string;
 }
 
 /** Prior turns as quoted data (they may have been edited client-side; they never override chart facts). */
@@ -112,7 +113,7 @@ export function fallbackText(reason: string, facts: Fact[]): string {
 }
 
 export async function runInterpret(inp: InterpretInput, send: SseSend, signal: AbortSignal): Promise<void> {
-  const facts = buildFacts(inp.chart, { year: inp.year, patterns: inp.patterns });
+  const facts = buildFacts(inp.chart, { year: inp.year, patterns: inp.patterns, calendarNote: inp.calendarNote });
   const { task, topics, stars } = taskFor(inp);
   const ds = topics.length ? await datasetSources(inp.chart, topics) : { sources: [], status: 'missing' as const };
   const sources: Source[] = numberSources([...ds.sources, ...classicSources(stars), ...nihaiSources(stars)]);

@@ -83,3 +83,10 @@ export function findVnCity(province: string, city: string): VnCity | undefined {
   const prov = VN_PROVINCES.find(x => x.name === province);
   return prov?.cities.find(c => c.name === city) ?? prov?.cities[0];
 }
+
+/** North/South of the 1954–1975 demarcation line (17°N) — selects the historical lunar-calendar rule.
+ *  Unknown / foreign places → 'north' (rule identical after 1975). */
+export function vnRegion(province: string | undefined, city: string | undefined): 'north' | 'south' {
+  const c = province ? findVnCity(province, city ?? '') : undefined;
+  return c && c.lat < 17 ? 'south' : 'north';
+}

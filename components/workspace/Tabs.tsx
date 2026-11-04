@@ -17,10 +17,10 @@ import PatternsCard from '@/components/PatternsCard';
 import Zh from '@/components/Zh';
 
 /** `birth` is the chart date BEFORE the calendar convention; the server applies options.calendar itself. */
-export interface Ctx { chart: ZiweiChart; birth: BirthInfo; settings: Settings }
-const base = ({ birth, settings }: Ctx) => ({
+export interface Ctx { chart: ZiweiChart; birth: BirthInfo; settings: Settings; region: 'north' | 'south' }
+const base = ({ birth, settings, region }: Ctx) => ({
   birth: birthPayload(birth),
-  options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar },
+  options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar, calendarRegion: region },
   provider: requestProvider(settings),
 });
 

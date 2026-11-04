@@ -17,18 +17,18 @@ import type { PatternVi, mingGongSummaryVi } from '@/lib/i18n/vi/patterns';
 import { term, stemBranchVi, BRANCHES_VI } from '@/lib/i18n';
 import { app } from '@/lib/i18n/vi/app';
 import { common } from '@/lib/i18n/vi/common';
-import { vnCnLunarDiffers } from '@/lib/calendar/vn-lunar';
 import { formToBirthInfo } from '@/lib/ziwei/share';
-import { applyCalendar } from '@/lib/calendar/vn-chart';
+import { applyCalendar, vnCalendarDiff, type CalendarRegion } from '@/lib/calendar/vn-chart';
+import { vnRegion } from '@/lib/geo/vn-places';
 import { birthPayload } from '@/lib/client/sse';
 import { getChart, listCharts, loadSettings, saveChart, type SavedChart, type Settings, DEFAULT_SETTINGS } from '@/lib/client/storage';
 
 const P = app.chartPage;
 type Tab = keyof typeof app.tabs;
 
-function buildChart(info: BirthInfo, s: Settings): ZiweiChart {
+function buildChart(info: BirthInfo, s: Settings, region: CalendarRegion): ZiweiChart {
   setBrightnessSchool(s.brightness);
-  try { return generateChart(applyCalendar(info, s.calendar).info, { leapMonth: s.leapMonth }); } finally { setBrightnessSchool('default'); }
+  try { return generateChart(applyCalendar(info, s.calendar, region).info, { leapMonth: s.leapMonth }); } finally { setBrightnessSchool('default'); }
 }
 
 const fmtLunar = (l: { year: number; month: number; day: number; leap: boolean }) => `${l.day}/${l.month}${l.leap ? ` ${P.leap}` : ''}/${l.year}`;
@@ -55,7 +55,7 @@ function Workspace() {
   const open = useCallback((f: BirthFormState, info: BirthInfo, id?: string) => {
     const s = loadSettings();
     let c: ZiweiChart;
-    try { c = buildChart(info, s); } catch { setFlash(common.errors.invalidDate); return; } // e.g. corrupt saved record
+    try { c = buildChart(info, s, vnRegion(f.province, f.city)); } catch { setFlash(common.errors.invalidDate); return; } // e.g. corrupt saved record
     setSettings(s); setForm(f); setSavedId(id); setBaseInfo(info); setChart(c);
     setEditing(false); setPalace(null); setStar(null); setTab('topics'); setExtra(null);
   }, []);
@@ -73,10 +73,10 @@ function Workspace() {
     if (!chart) return;
     const c = new AbortController();
     fetch('/api/chart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: c.signal,
-      body: JSON.stringify({ birth: birthPayload(baseInfo ?? chart.birthInfo), options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar } }) })
+      body: JSON.stringify({ birth: birthPayload(baseInfo ?? chart.birthInfo), options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar, calendarRegion: vnRegion(form?.province, form?.city) } }) })
       .then(r => r.ok ? r.json() : null).then(j => j && setExtra({ patterns: j.patterns, mingSummary: j.mingSummary })).catch(() => {});
     return () => c.abort();
-  }, [chart, baseInfo, settings.leapMonth, settings.brightness, settings.calendar]);
+  }, [chart, baseInfo, form, settings.leapMonth, settings.brightness, settings.calendar]);
 
   const onSave = () => {
     if (!form) return;
@@ -116,11 +116,12 @@ function Workspace() {
   const b = chart.birthInfo;
   const li = chart.lunarInfo;
   const db = baseInfo ?? b;
-  const diff = vnCnLunarDiffers(db.year, db.month, db.day);
+  const region = vnRegion(form?.province, form?.city);
+  const diff = vnCalendarDiff(db.year, db.month, db.day, region);
   const origDate = form ? `${form.day}/${form.month}/${form.year}` : '';
   const chartDate = baseInfo ? `${baseInfo.day}/${baseInfo.month}/${baseInfo.year}` : `${b.day}/${b.month}/${b.year}`;
-  const ctx = { chart, birth: baseInfo ?? b, settings };
-  const cal = baseInfo ? applyCalendar(baseInfo, settings.calendar) : null;
+  const ctx = { chart, birth: baseInfo ?? b, settings, region };
+  const cal = baseInfo ? applyCalendar(baseInfo, settings.calendar, region) : null;
   const conv = [app.settings.lateZishiOpts[settings.lateZishi].split(' (')[0], app.settings.leapOpts[settings.leapMonth].split(':')[0].split(' (')[0], app.settings.brightOpts[settings.brightness as keyof typeof app.settings.brightOpts], app.settings.calendarOpts[settings.calendar].split(' (')[0].replace(/ UTC.*$/, ''), app.settings.eotOpts[settings.equationOfTime ? 'apparent' : 'mean'].split(' —')[0]].join(' · ');
 
   return (

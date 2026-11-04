@@ -1,4 +1,4 @@
-import { BadRequest, birthFrom, buildChart, guardRequest, jsonError, parseOptions, readJson, sseResponse } from '@/lib/server/http';
+import { BadRequest, birthFrom, buildChart, calendarNote, guardRequest, jsonError, parseOptions, readJson, sseResponse } from '@/lib/server/http';
 import { runInterpret, type Mode } from '@/lib/server/ai/interpret';
 import { parseHistory } from '@/lib/server/ai/guard';
 import { resolveProvider } from '@/lib/server/ai/providers';
@@ -14,7 +14,8 @@ export async function POST(req: Request) {
   const denied = guardRequest(req); if (denied) return denied;
   try {
     const body = await readJson(req);
-    const chart = buildChart(birthFrom(body), parseOptions(body.options));
+    const birth = birthFrom(body), opts = parseOptions(body.options);
+    const chart = buildChart(birth, opts);
     const mode = (body.mode ?? 'overview') as Mode;
     if (!MODES.includes(mode)) throw new BadRequest('mode không hợp lệ');
     if (mode === 'topic' && !TOPIC_KEYS.includes(body.topic as never)) throw new BadRequest('topic không hợp lệ');
@@ -27,7 +28,7 @@ export async function POST(req: Request) {
     try { history = parseHistory(body.messages); } catch (e) { throw new BadRequest((e as Error).message); }
     return sseResponse((send, signal) => runInterpret({
       chart, mode, topic: body.topic as string, palaceBranch: body.palaceBranch as number, starName: body.starName as string,
-      year, question: body.question as string, history, provider: resolveProvider(body.provider), patterns: chartPatternsVi(chart),
+      year, question: body.question as string, history, provider: resolveProvider(body.provider), patterns: chartPatternsVi(chart), calendarNote: calendarNote(birth, opts),
     }, send, signal), req.signal);
   } catch (e) { return jsonError(e); }
 }

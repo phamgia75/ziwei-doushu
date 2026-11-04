@@ -4,8 +4,6 @@ import { patternVi } from '@/lib/i18n/vi/patterns';
 
 /** Rule-detected chart patterns (deterministic, from the engine) as Vietnamese fact lines. */
 export function chartPatternsVi(chart: ZiweiChart): string[] {
-  return detectPatterns(chart).map(p => {
-    const v = patternVi(p);
-    return `${v.name} — ${v.description}`;
-  });
+  // names only: the model knows the classical meaning, and full descriptions cost ~1k prompt tokens
+  return detectPatterns(chart).map(p => patternVi(p).name);
 }

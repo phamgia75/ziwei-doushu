@@ -30,7 +30,7 @@ function sihuaLine(chart: ZiweiChart, transforms: Record<string, string>): strin
   return SIHUA_ORDER.map(h => `Hóa ${term(h)}: ${term(transforms[h])} → ${palaceVi(palaceOfStar(chart, transforms[h]))}`).join('; ');
 }
 
-export function buildFacts(chart: ZiweiChart, opts: { year?: number; patterns?: string[] } = {}): Fact[] {
+export function buildFacts(chart: ZiweiChart, opts: { year?: number; patterns?: string[]; calendarNote?: string } = {}): Fact[] {
   const facts: Fact[] = [];
   const add = (kind: Fact['kind'], text: string, palaceBranch?: number) =>
     facts.push({ id: `F${facts.length + 1}`, kind, text, palaceBranch });
@@ -43,6 +43,8 @@ export function buildFacts(chart: ZiweiChart, opts: { year?: number; patterns?: 
     `${bi(chart.wuxingJuName)}; Mệnh Chủ ${term(chart.mingZhu)}, Thân Chủ ${term(chart.shenZhu)}; tuổi âm hiện tại ${chart.currentAge}.`);
   add('basic', `Cung Mệnh tại ${BRANCHES_VI[chart.mingGongBranch]}; Thân cư ${palaceVi(shen)} (chi ${BRANCHES_VI[chart.shenGongBranch]}).`,
     chart.mingGongBranch);
+
+  if (opts.calendarNote) add('basic', opts.calendarNote);
 
   // Palaces in traditional order starting from Mệnh (counter-clockwise by branch)
   for (let i = 0; i < 12; i++) {

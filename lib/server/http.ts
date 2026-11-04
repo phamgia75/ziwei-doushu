@@ -2,7 +2,7 @@
 import { generateChart, setBrightnessSchool, type LunarMonthPolicy, type SchoolBrightnessKind } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { LUNAR_YEAR_MIN, LUNAR_YEAR_MAX } from '@/lib/ziwei/lunar-solar';
-import { applyCalendar, type CalendarMode } from '@/lib/calendar/vn-chart';
+import { applyCalendar, type CalendarMode, type CalendarRegion } from '@/lib/calendar/vn-chart';
 
 export class BadRequest extends Error {}
 
@@ -27,7 +27,7 @@ const int = (v: unknown, min: number, max: number, name: string): number => {
 const LEAP: LunarMonthPolicy[] = ['split', 'next-month', 'prev-month', 'origin-month'];
 const BRIGHT: SchoolBrightnessKind[] = ['default', 'XD1', 'XD2', 'ZZ'];
 
-export interface ChartOptions { leapMonth: LunarMonthPolicy; brightness: SchoolBrightnessKind; calendar: CalendarMode }
+export interface ChartOptions { leapMonth: LunarMonthPolicy; brightness: SchoolBrightnessKind; calendar: CalendarMode; calendarRegion: CalendarRegion }
 
 /** Validate a birth payload ({year, month, day, hour, gender} — the chart date after the Tý rule). */
 export function parseBirth(v: unknown): BirthInfo {
@@ -53,14 +53,16 @@ export function parseOptions(v: unknown): ChartOptions {
   if (!BRIGHT.includes(brightness)) throw new BadRequest('Bảng độ sáng không hợp lệ');
   const calendar = (o.calendar ?? 'cn') as CalendarMode;
   if (calendar !== 'cn' && calendar !== 'vn') throw new BadRequest('Lịch không hợp lệ');
-  return { leapMonth, brightness, calendar };
+  const calendarRegion = (o.calendarRegion ?? 'north') as CalendarRegion;
+  if (calendarRegion !== 'north' && calendarRegion !== 'south') throw new BadRequest('Vùng lịch không hợp lệ');
+  return { leapMonth, brightness, calendar, calendarRegion };
 }
 
 /** Deterministic server-side chart. setBrightnessSchool is a module-global in the engine, so it is
  *  set and restored synchronously around generateChart (no await in between → no interleaving). */
 export function buildChart(birth: BirthInfo, opts: ChartOptions): ZiweiChart {
   setBrightnessSchool(opts.brightness);
-  try { return generateChart(applyCalendar(birth, opts.calendar).info, { leapMonth: opts.leapMonth }); }
+  try { return generateChart(applyCalendar(birth, opts.calendar, opts.calendarRegion).info, { leapMonth: opts.leapMonth }); }
   finally { setBrightnessSchool('default'); }
 }
 
@@ -107,4 +109,12 @@ export function guardRequest(req: Request): Response | null {
 export function birthFrom(body: Record<string, unknown>, key = 'birth', chartKey = 'chart'): BirthInfo {
   const chart = body[chartKey] as { birthInfo?: unknown } | undefined;
   return parseBirth(body[key] ?? chart?.birthInfo);
+}
+
+/** Calendar convention actually applied, so answers/facts can state it (incl. silent CN fallback). */
+export function calendarNote(birth: BirthInfo, opts: ChartOptions): string | undefined {
+  if (opts.calendar !== 'vn') return undefined;
+  const r = applyCalendar(birth, 'vn', opts.calendarRegion);
+  if (r.unavailable) return 'Người dùng chọn lịch âm Việt Nam, nhưng ngày âm lịch Việt Nam này không tồn tại trong lịch Trung Quốc mà engine dùng, nên lá số tính theo lịch Trung Quốc.';
+  return r.remapped ? 'Lá số tính theo lịch âm Việt Nam (khác lịch Trung Quốc ở ngày sinh này).' : 'Lá số theo lịch âm Việt Nam (trùng lịch Trung Quốc ở ngày sinh này).';
 }

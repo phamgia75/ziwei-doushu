@@ -4,7 +4,8 @@ import BirthForm, { type BirthFormState } from '@/components/BirthForm';
 import { formToBirthInfo as toBirthInfo } from '@/lib/ziwei/share';
 import { generateChart as buildChart, setBrightnessSchool } from '@/lib/ziwei/algorithm';
 import { loadSettings, requestProvider, DEFAULT_SETTINGS, type Settings } from '@/lib/client/storage';
-import { applyCalendar } from '@/lib/calendar/vn-chart';
+import { applyCalendar, type CalendarRegion } from '@/lib/calendar/vn-chart';
+import { vnRegion } from '@/lib/geo/vn-places';
 import { birthPayload } from '@/lib/client/sse';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { useTheme } from '@/components/ThemeProvider';
@@ -78,20 +79,24 @@ export default function HemingPage() {
   // The region between "表单是否填齐" and "const cardStyle" is executed by the upstream regression
   // tests with their own fetch/formToBirthInfo/generateChart. These component-scope wrappers apply
   // the user's conventions, AI provider and relation type without touching that region.
-  const formToBirthInfo = useCallback((f: BirthFormState) => toBirthInfo(f, { lateZishi: settings.lateZishi, equationOfTime: settings.equationOfTime }), [settings.lateZishi, settings.equationOfTime]);
+  // tags each BirthInfo with its birthplace region (historical calendar rule); birthPayload() strips it before sending
+  const formToBirthInfo = useCallback((f: BirthFormState): BirthInfo & { calendarRegion?: CalendarRegion } => ({
+    ...toBirthInfo(f, { lateZishi: settings.lateZishi, equationOfTime: settings.equationOfTime }), calendarRegion: vnRegion(f.province, f.city),
+  }), [settings.lateZishi, settings.equationOfTime]);
   const fetch = useCallback((url: string, init: RequestInit) => window.fetch(url, {
     ...init,
     // birthA/birthB = birth fields before the calendar convention (the server applies options.calendar once)
     // only birth fields leave the page (the upstream body also carried full charts incl. names)
     body: JSON.stringify({ question: JSON.parse(String(init.body)).question, relation, provider: requestProvider(settings),
-      ...(formA && formB ? { birthA: birthPayload(formToBirthInfo(formA)), birthB: birthPayload(formToBirthInfo(formB)) } : {}),
+      ...(formA && formB ? { birthA: birthPayload(formToBirthInfo(formA)), birthB: birthPayload(formToBirthInfo(formB)),
+        regionA: vnRegion(formA.province, formA.city), regionB: vnRegion(formB.province, formB.city) } : {}),
       options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar } }),
   }), [relation, settings, formA, formB, formToBirthInfo]);
   // Charts are generated in the browser with the local engine.
   const generateChart = useCallback(async (info: BirthInfo): Promise<ZiweiChart | null> => {
     setBrightnessSchool(settings.brightness);
     try {
-      return buildChart(applyCalendar(info, settings.calendar).info, { leapMonth: settings.leapMonth });
+      return buildChart(applyCalendar(info, settings.calendar, (info as BirthInfo & { calendarRegion?: CalendarRegion }).calendarRegion).info, { leapMonth: settings.leapMonth });
     } catch {
       return null;
     } finally {
@@ -205,6 +210,12 @@ export default function HemingPage() {
           </div>
         </div>
 
+        {settings.calendar === 'vn' && ([[H.personA, formA], [H.personB, formB]] as const).map(([who, f]) => {
+          if (!f) return null;
+          const bi = formToBirthInfo(f);
+          return applyCalendar(bi, 'vn', bi.calendarRegion).unavailable
+            ? <div key={who} className="tv-warn" style={{ marginBottom: 12 }}>{who}: {H.vnUnavailable}</div> : null;
+        })}
         {chartA && chartB && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }} className="heming-grid">
             <ChartFacts label={H.personA} chart={chartA} style={cardStyle} />

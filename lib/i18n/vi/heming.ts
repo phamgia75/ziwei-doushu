@@ -9,6 +9,7 @@ export const heming = {
   emptyHint: 'Điền đủ thông tin của hai người rồi bấm nút bên dưới để AI phân tích mức tương hợp.',
   start: 'Bắt đầu phân tích',
   relationLabel: 'Loại quan hệ',
+  vnUnavailable: 'ngày âm lịch Việt Nam không tồn tại trong lịch Trung Quốc mà engine dùng, nên lá số tính theo lịch Trung Quốc.',
   relations: { love: 'Tình cảm / hôn nhân', partner: 'Hợp tác làm ăn', family: 'Cha mẹ – con cái', friend: 'Bạn bè' },
   formIncomplete: 'Vui lòng điền đầy đủ thông tin sinh của cả hai người.',
   comparing: 'Đang so sánh hai lá số…',

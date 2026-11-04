@@ -13,15 +13,15 @@ export type Relation = keyof typeof RELATIONS;
 const spouseStars = (c: ZiweiChart) => c.palaces.find(p => p.name.startsWith('夫妻'))?.stars.filter(s => s.type === 'major').map(s => s.name) ?? [];
 
 /** Facts for two charts, numbered continuously and prefixed with the person. */
-export function pairFacts(a: ZiweiChart, b: ZiweiChart): Fact[] {
-  const fa = buildFacts(a), fb = buildFacts(b);
+export function pairFacts(a: ZiweiChart, b: ZiweiChart, notes: [string?, string?] = []): Fact[] {
+  const fa = buildFacts(a, { calendarNote: notes[0] }), fb = buildFacts(b, { calendarNote: notes[1] });
   return [...fa.map(f => ({ ...f, text: `Người A — ${f.text}` })), ...fb.map(f => ({ ...f, text: `Người B — ${f.text}` }))]
     .filter(f => f.kind !== 'daxian' || /HIỆN TẠI/.test(f.text)) // keep prompt small: only current Đại Hạn per person
     .map((f, i) => ({ ...f, id: `F${i + 1}` }));
 }
 
-export async function runHeming(a: ZiweiChart, b: ZiweiChart, relation: Relation, questionRaw: string, provider: ProviderId, send: SseSend, signal: AbortSignal) {
-  const facts = pairFacts(a, b);
+export async function runHeming(a: ZiweiChart, b: ZiweiChart, relation: Relation, questionRaw: string, provider: ProviderId, send: SseSend, signal: AbortSignal, notes: [string?, string?] = []) {
+  const facts = pairFacts(a, b, notes);
   const stars = [...new Set([...spouseStars(a), ...spouseStars(b)])];
   const sources = numberSources([...(relation === 'love' ? hemingSources(stars) : []), ...classicSources(stars, 2)]);
   const question = sanitize(questionRaw, 1000);
