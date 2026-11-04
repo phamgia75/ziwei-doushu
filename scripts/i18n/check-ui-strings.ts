@@ -19,7 +19,8 @@ const HAN = /\p{Script=Han}/u;
 /** Upstream components kept for merge-compatibility but never rendered by TuVi AI.
  *  tests/unit/unused-upstream-not-imported.test.ts fails if any of them gets imported. */
 export const UNUSED_UPSTREAM = ['components/ScrollIntro.tsx', 'components/AnnouncementModal.tsx', 'components/ShareModal.tsx',
-  'components/ShareCardCanvas.tsx', 'components/FamousPersonCard.tsx', 'components/ChatPanel.tsx', 'components/StarField.tsx'];
+  'components/ShareCardCanvas.tsx', 'components/FamousPersonCard.tsx', 'components/ChatPanel.tsx', 'components/StarField.tsx',
+  'components/InsightPanel.tsx' /* replaced by components/workspace/Tabs.tsx */];
 const KEY_FUNCS = new Set(['term', 'hasTerm', 'tChar', 'substituteTerms', 'glossaryFor']);
 const root = process.cwd();
 
@@ -66,6 +67,7 @@ function hasOkComment(src: string, lines: string[], line: number): boolean {
 }
 
 export function checkFile(file: string): string[] {
+  if (UNUSED_UPSTREAM.includes(relative(root, file))) return [];
   const src = readFileSync(file, 'utf8');
   const lines = src.split('\n');
   if (lines.slice(0, 5).some(l => l.includes('i18n-exempt:'))) return [];

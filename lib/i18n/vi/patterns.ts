@@ -367,7 +367,7 @@ export function patternVi(p: Pattern): PatternVi {
     nameZh: p.name,
     level: p.level,
     description: tr(p.description),
-    palaces: p.palaces.map(x => term(x)),
+    palaces: [...new Set(p.palaces.map(x => term(x)))], // 官禄 and 官禄宫 both render as "Quan Lộc"
     conditions: p.conditions && {
       required: p.conditions.required.map(tr),
       bonus: p.conditions.bonus?.map(tr),

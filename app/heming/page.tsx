@@ -1,8 +1,9 @@
 'use client';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import BirthForm, { type BirthFormState } from '@/components/BirthForm';
-import { formToBirthInfo } from '@/lib/ziwei/share';
-import { generateChart as buildChart } from '@/lib/ziwei/algorithm';
+import { formToBirthInfo as toBirthInfo } from '@/lib/ziwei/share';
+import { generateChart as buildChart, setBrightnessSchool } from '@/lib/ziwei/algorithm';
+import { loadSettings, requestProvider, DEFAULT_SETTINGS, type Settings } from '@/lib/client/storage';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { useTheme } from '@/components/ThemeProvider';
 import SiteHeader from '@/components/SiteHeader';
@@ -68,14 +69,30 @@ export default function HemingPage() {
   const [formError, setFormError] = useState<string | null>(null);
   const analysisRef = useRef<HTMLDivElement>(null);
 
+  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [relation, setRelation] = useState<keyof typeof H.relations>('love');
+  useEffect(() => setSettings(loadSettings()), []);
+
+  // The region between "表单是否填齐" and "const cardStyle" is executed by the upstream regression
+  // tests with their own fetch/formToBirthInfo/generateChart. These component-scope wrappers apply
+  // the user's conventions, AI provider and relation type without touching that region.
+  const formToBirthInfo = useCallback((f: BirthFormState) => toBirthInfo(f, { lateZishi: settings.lateZishi }), [settings.lateZishi]);
+  const fetch = useCallback((url: string, init: RequestInit) => window.fetch(url, {
+    ...init,
+    body: JSON.stringify({ ...JSON.parse(String(init.body)), relation, provider: requestProvider(settings),
+      options: { leapMonth: settings.leapMonth, brightness: settings.brightness } }),
+  }), [relation, settings]);
   // Charts are generated in the browser with the local engine.
   const generateChart = useCallback(async (info: BirthInfo): Promise<ZiweiChart | null> => {
+    setBrightnessSchool(settings.brightness);
     try {
-      return buildChart(info);
+      return buildChart(info, { leapMonth: settings.leapMonth });
     } catch {
       return null;
+    } finally {
+      setBrightnessSchool('default');
     }
-  }, []);
+  }, [settings.brightness, settings.leapMonth]);
 
   // 表单是否填齐
   const isFormReady = (f: BirthFormState | null): boolean =>
@@ -144,7 +161,7 @@ export default function HemingPage() {
     } finally {
       setAnalyzing(false);
     }
-  }, [formA, formB, generateChart]);
+  }, [formA, formB, generateChart, fetch, formToBirthInfo]);
 
   const cardStyle = {
     background: isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.9)',
@@ -206,6 +223,13 @@ export default function HemingPage() {
           {!analysis && !analyzing && (
             <div style={{ textAlign: 'center', padding: '32px 0' }}>
               <div style={{ fontSize: '14px', color: 'var(--tx-3)', marginBottom: '24px', lineHeight: 1.7 }}>{H.emptyHint}</div>
+              <label style={{ display: 'inline-flex', gap: 8, alignItems: 'center', marginBottom: 16, fontSize: 14 }}>
+                {H.relationLabel}
+                <select className="tv-input" style={{ width: 'auto' }} value={relation} onChange={e => setRelation(e.target.value as keyof typeof H.relations)}>
+                  {(Object.keys(H.relations) as (keyof typeof H.relations)[]).map(k => <option key={k} value={k}>{H.relations[k]}</option>)}
+                </select>
+              </label>
+              <br />
               <button
                 onClick={() => runAnalysis()}
                 className="no-print"

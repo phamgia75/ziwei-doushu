@@ -1,3 +1,4 @@
+import SavedChartsList from '@/components/SavedChartsList';
 import Link from 'next/link';
 import SiteHeader from '@/components/SiteHeader';
 import { common } from '@/lib/i18n';
@@ -28,8 +29,7 @@ export default function HomePage() {
           ))}
         </div>
 
-        {/* Filled in by the saved-charts feature. */}
-        <section id="saved-charts" aria-label={home.savedTitle} />
+        <section id="saved-charts" aria-label={home.savedTitle}><SavedChartsList /></section>
 
         <footer style={{ marginTop: '40px', paddingTop: '16px', borderTop: '1px solid var(--bdr)' }}>
           <p className="page-note">{common.disclaimer}</p>

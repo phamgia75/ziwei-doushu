@@ -1,4 +1,5 @@
 /** /library/[book]/[chapter] — one chapter, original Chinese text. */
+import ChapterTranslate from '@/components/ChapterTranslate';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import SiteHeader from '@/components/SiteHeader';
@@ -41,7 +42,9 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
         {chapter.subtitle && <p lang="zh">{chapter.subtitle}</p>}
 
         {/* On-demand AI translation of this chapter is mounted here. */}
-        <div id="chapter-translation" className="no-print" data-book={book.slug} data-chapter={chapterIdx} />
+        <div id="chapter-translation" className="no-print" data-book={book.slug} data-chapter={chapterIdx}>
+          <ChapterTranslate book={book.slug} chapter={chapterIdx} />
+        </div>
 
         <p className="page-note" style={{ margin: '16px 0 8px' }}>{L.originalNote}</p>
         <div className="card-flat" style={{ padding: '24px 22px' }}>

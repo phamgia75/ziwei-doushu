@@ -2,14 +2,16 @@
 import { motion } from 'framer-motion';
 import type { ZiweiChart } from '@/lib/ziwei/types';
 import type { SiHua } from '@/lib/ziwei/types';
-import { detectPatterns, getMingGongSummary } from '@/lib/ziwei/patterns';
 import { term, stemBranchVi, BRANCHES_VI } from '@/lib/i18n';
-import { patternVi, mingGongSummaryVi, patternsUi as pt } from '@/lib/i18n/vi/patterns';
+import { patternsUi as pt, type PatternVi, type mingGongSummaryVi } from '@/lib/i18n/vi/patterns';
 import { SIHUA_FULL, summary as t } from '@/lib/i18n/vi/chart';
 import Zh from './Zh';
 
 interface ChartSummaryProps {
   chart: ZiweiChart;
+  /** Precomputed on the server (/api/chart) because lib/ziwei/patterns.ts is server-only. */
+  patterns: PatternVi[];
+  mingSummary: ReturnType<typeof mingGongSummaryVi>;
 }
 
 const PatternLevelStyle = {
@@ -19,9 +21,8 @@ const PatternLevelStyle = {
   caution: { dot: 'bg-orange-500', label: 'text-orange-500', badge: 'text-orange-500 bg-orange-500/10 border-orange-500/25' },
 };
 
-export default function ChartSummary({ chart }: ChartSummaryProps) {
-  const patterns = detectPatterns(chart).map(patternVi);
-  const { stars: mingStars, keywords, nature } = mingGongSummaryVi(getMingGongSummary(chart));
+export default function ChartSummary({ chart, patterns, mingSummary }: ChartSummaryProps) {
+  const { stars: mingStars, keywords, nature } = mingSummary;
   const currentDx = chart.daXians[chart.currentDaXianIndex];
 
   const siHuaSummary: { name: string; siHua: string; palaceName: string }[] = [];
