@@ -4,6 +4,8 @@ import BirthForm, { type BirthFormState } from '@/components/BirthForm';
 import { formToBirthInfo as toBirthInfo } from '@/lib/ziwei/share';
 import { generateChart as buildChart, setBrightnessSchool } from '@/lib/ziwei/algorithm';
 import { loadSettings, requestProvider, DEFAULT_SETTINGS, type Settings } from '@/lib/client/storage';
+import { applyCalendar } from '@/lib/calendar/vn-chart';
+import { birthPayload } from '@/lib/client/sse';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { useTheme } from '@/components/ThemeProvider';
 import SiteHeader from '@/components/SiteHeader';
@@ -76,23 +78,25 @@ export default function HemingPage() {
   // The region between "表单是否填齐" and "const cardStyle" is executed by the upstream regression
   // tests with their own fetch/formToBirthInfo/generateChart. These component-scope wrappers apply
   // the user's conventions, AI provider and relation type without touching that region.
-  const formToBirthInfo = useCallback((f: BirthFormState) => toBirthInfo(f, { lateZishi: settings.lateZishi }), [settings.lateZishi]);
+  const formToBirthInfo = useCallback((f: BirthFormState) => toBirthInfo(f, { lateZishi: settings.lateZishi, equationOfTime: settings.equationOfTime }), [settings.lateZishi, settings.equationOfTime]);
   const fetch = useCallback((url: string, init: RequestInit) => window.fetch(url, {
     ...init,
+    // birthA/birthB = birth fields before the calendar convention (the server applies options.calendar once)
     body: JSON.stringify({ ...JSON.parse(String(init.body)), relation, provider: requestProvider(settings),
-      options: { leapMonth: settings.leapMonth, brightness: settings.brightness } }),
-  }), [relation, settings]);
+      ...(formA && formB ? { birthA: birthPayload(formToBirthInfo(formA)), birthB: birthPayload(formToBirthInfo(formB)) } : {}),
+      options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar } }),
+  }), [relation, settings, formA, formB, formToBirthInfo]);
   // Charts are generated in the browser with the local engine.
   const generateChart = useCallback(async (info: BirthInfo): Promise<ZiweiChart | null> => {
     setBrightnessSchool(settings.brightness);
     try {
-      return buildChart(info, { leapMonth: settings.leapMonth });
+      return buildChart(applyCalendar(info, settings.calendar).info, { leapMonth: settings.leapMonth });
     } catch {
       return null;
     } finally {
       setBrightnessSchool('default');
     }
-  }, [settings.brightness, settings.leapMonth]);
+  }, [settings.brightness, settings.leapMonth, settings.calendar]);
 
   // 表单是否填齐
   const isFormReady = (f: BirthFormState | null): boolean =>

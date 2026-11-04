@@ -70,6 +70,18 @@ export default function SettingsPage() {
               </select>
             </label>
           ))}
+          <label style={{ display: 'block', marginTop: 12 }}>
+            <span style={{ fontWeight: 600 }}>{S.calendar}</span>
+            <select className="tv-input" value={s.calendar} onChange={e => update({ calendar: e.target.value as Settings['calendar'] })}>
+              {Object.entries(S.calendarOpts).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </label>
+          <label style={{ display: 'block', marginTop: 12 }}>
+            <span style={{ fontWeight: 600 }}>{S.eot}</span>
+            <select className="tv-input" value={s.equationOfTime ? 'apparent' : 'mean'} onChange={e => update({ equationOfTime: e.target.value === 'apparent' })}>
+              {Object.entries(S.eotOpts).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+            </select>
+          </label>
           <p className="tv-note" style={{ marginTop: 8 }}>{S.convNote}</p>
         </section>
 

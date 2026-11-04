@@ -1,7 +1,7 @@
 'use client';
 /** Right-hand workspace tabs of /chart: topics (dataset + AI), chat, palace/star detail, cycles, patterns. */
 import { useEffect, useRef, useState } from 'react';
-import type { Palace, Star, ZiweiChart } from '@/lib/ziwei/types';
+import type { BirthInfo, Palace, Star, ZiweiChart } from '@/lib/ziwei/types';
 import type { PatternVi } from '@/lib/i18n/vi/patterns';
 import { term } from '@/lib/i18n';
 import { TOPICS, type TopicKey } from '@/lib/i18n/vi/topics';
@@ -15,10 +15,11 @@ import StarDetailPanel from '@/components/StarDetailPanel';
 import PatternsCard from '@/components/PatternsCard';
 import Zh from '@/components/Zh';
 
-export interface Ctx { chart: ZiweiChart; settings: Settings }
-const base = ({ chart, settings }: Ctx) => ({
-  birth: birthPayload(chart.birthInfo),
-  options: { leapMonth: settings.leapMonth, brightness: settings.brightness },
+/** `birth` is the chart date BEFORE the calendar convention; the server applies options.calendar itself. */
+export interface Ctx { chart: ZiweiChart; birth: BirthInfo; settings: Settings }
+const base = ({ birth, settings }: Ctx) => ({
+  birth: birthPayload(birth),
+  options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar },
   provider: requestProvider(settings),
 });
 

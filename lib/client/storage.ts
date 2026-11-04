@@ -14,12 +14,16 @@ export interface Settings {
   lateZishi: 'next-day' | 'current-day';
   leapMonth: LunarMonthPolicy;
   brightness: SchoolBrightnessKind;
+  /** 'cn' = engine default (Chinese UTC+8 calendar); 'vn' = Vietnamese UTC+7 lunar calendar. */
+  calendar: 'cn' | 'vn';
+  /** Apparent true solar time (equation of time) instead of mean solar time. */
+  equationOfTime: boolean;
 }
 export interface SavedChart { id: string; label: string; form: BirthFormState; createdAt: string }
 
 const K_SETTINGS = 'tuvi.settings.v1';
 const K_CHARTS = 'tuvi.charts.v1';
-export const DEFAULT_SETTINGS: Settings = { provider: 'ollama', externalConsent: false, lateZishi: 'next-day', leapMonth: 'split', brightness: 'default' };
+export const DEFAULT_SETTINGS: Settings = { provider: 'ollama', externalConsent: false, lateZishi: 'next-day', leapMonth: 'split', brightness: 'default', calendar: 'cn', equationOfTime: false };
 
 function read<T>(key: string, fallback: T): T {
   try { const v = localStorage.getItem(key); return v ? JSON.parse(v) as T : fallback; } catch { return fallback; }

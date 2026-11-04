@@ -19,6 +19,7 @@ import { app } from '@/lib/i18n/vi/app';
 import { common } from '@/lib/i18n/vi/common';
 import { vnCnLunarDiffers } from '@/lib/calendar/vn-lunar';
 import { formToBirthInfo } from '@/lib/ziwei/share';
+import { applyCalendar } from '@/lib/calendar/vn-chart';
 import { birthPayload } from '@/lib/client/sse';
 import { getChart, listCharts, loadSettings, saveChart, type SavedChart, type Settings, DEFAULT_SETTINGS } from '@/lib/client/storage';
 
@@ -27,7 +28,7 @@ type Tab = keyof typeof app.tabs;
 
 function buildChart(info: BirthInfo, s: Settings): ZiweiChart {
   setBrightnessSchool(s.brightness);
-  try { return generateChart(info, { leapMonth: s.leapMonth }); } finally { setBrightnessSchool('default'); }
+  try { return generateChart(applyCalendar(info, s.calendar).info, { leapMonth: s.leapMonth }); } finally { setBrightnessSchool('default'); }
 }
 
 const fmtLunar = (l: { year: number; month: number; day: number; leap: boolean }) => `${l.day}/${l.month}${l.leap ? ` ${P.leap}` : ''}/${l.year}`;
@@ -39,6 +40,7 @@ function Workspace() {
   const [form, setForm] = useState<BirthFormState | null>(null);
   const [savedId, setSavedId] = useState<string | undefined>();
   const [chart, setChart] = useState<ZiweiChart | null>(null);
+  const [baseInfo, setBaseInfo] = useState<BirthInfo | null>(null);
   const [editing, setEditing] = useState(false);
   const [saved, setSaved] = useState<SavedChart[]>([]);
   const [tab, setTab] = useState<Tab>('topics');
@@ -52,7 +54,7 @@ function Workspace() {
 
   const open = useCallback((f: BirthFormState, info: BirthInfo, id?: string) => {
     const s = loadSettings();
-    setSettings(s); setForm(f); setSavedId(id); setChart(buildChart(info, s));
+    setSettings(s); setForm(f); setSavedId(id); setBaseInfo(info); setChart(buildChart(info, s));
     setEditing(false); setPalace(null); setStar(null); setTab('topics'); setExtra(null);
   }, []);
 
@@ -61,7 +63,7 @@ function Workspace() {
     const id = params.get('id');
     const rec = id ? getChart(id) : undefined;
     if (!rec) return;
-    open(rec.form, formToBirthInfo(rec.form, { lateZishi: loadSettings().lateZishi }), rec.id);
+    open(rec.form, formToBirthInfo(rec.form, { lateZishi: loadSettings().lateZishi, equationOfTime: loadSettings().equationOfTime }), rec.id);
   }, [params, open]);
 
   // patterns + Mệnh summary come from the server (lib/ziwei/patterns.ts is server-only)
@@ -69,10 +71,10 @@ function Workspace() {
     if (!chart) return;
     const c = new AbortController();
     fetch('/api/chart', { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: c.signal,
-      body: JSON.stringify({ birth: birthPayload(chart.birthInfo), options: { leapMonth: settings.leapMonth, brightness: settings.brightness } }) })
+      body: JSON.stringify({ birth: birthPayload(baseInfo ?? chart.birthInfo), options: { leapMonth: settings.leapMonth, brightness: settings.brightness, calendar: settings.calendar } }) })
       .then(r => r.ok ? r.json() : null).then(j => j && setExtra({ patterns: j.patterns, mingSummary: j.mingSummary })).catch(() => {});
     return () => c.abort();
-  }, [chart, settings.leapMonth, settings.brightness]);
+  }, [chart, baseInfo, settings.leapMonth, settings.brightness, settings.calendar]);
 
   const onSave = () => {
     if (!form) return;
@@ -92,6 +94,7 @@ function Workspace() {
         <BirthForm
           initialData={editing ? form ?? undefined : undefined}
           lateZishi={settings.lateZishi}
+          equationOfTime={settings.equationOfTime}
           onFormSave={f => { lastForm.current = f; }}
           onSubmit={info => lastForm.current && open(lastForm.current, info, editing ? savedId : undefined)}
         />
@@ -109,11 +112,13 @@ function Workspace() {
 
   const b = chart.birthInfo;
   const li = chart.lunarInfo;
-  const diff = vnCnLunarDiffers(b.year, b.month, b.day);
+  const db = baseInfo ?? b;
+  const diff = vnCnLunarDiffers(db.year, db.month, db.day);
   const origDate = form ? `${form.day}/${form.month}/${form.year}` : '';
-  const chartDate = `${b.day}/${b.month}/${b.year}`;
-  const ctx = { chart, settings };
-  const conv = [app.settings.lateZishiOpts[settings.lateZishi].split(' (')[0], app.settings.leapOpts[settings.leapMonth].split(':')[0].split(' (')[0], app.settings.brightOpts[settings.brightness as keyof typeof app.settings.brightOpts]].join(' · ');
+  const chartDate = baseInfo ? `${baseInfo.day}/${baseInfo.month}/${baseInfo.year}` : `${b.day}/${b.month}/${b.year}`;
+  const ctx = { chart, birth: baseInfo ?? b, settings };
+  const cal = baseInfo ? applyCalendar(baseInfo, settings.calendar) : null;
+  const conv = [app.settings.lateZishiOpts[settings.lateZishi].split(' (')[0], app.settings.leapOpts[settings.leapMonth].split(':')[0].split(' (')[0], app.settings.brightOpts[settings.brightness as keyof typeof app.settings.brightOpts], app.settings.calendarOpts[settings.calendar].split(' (')[0].replace(/ UTC.*$/, ''), app.settings.eotOpts[settings.equationOfTime ? 'apparent' : 'mean'].split(' —')[0]].join(' · ');
 
   return (
     <main style={{ maxWidth: 1400, margin: '0 auto', padding: '16px 16px 64px' }}>
@@ -124,7 +129,9 @@ function Workspace() {
         </p>
         {origDate !== chartDate && <p className="tv-note">{P.chartDateNote(chartDate)}</p>}
         <p className="tv-note">{P.conventions(conv)}</p>
-        {diff.differs && <div className="tv-warn" style={{ marginTop: 6 }}>{P.vnLunarWarn(fmtLunar(diff.vn), fmtLunar(diff.cn))}</div>}
+        {settings.calendar === 'cn' && diff.differs && <div className="tv-warn" style={{ marginTop: 6 }}>{P.vnLunarWarn(fmtLunar(diff.vn), fmtLunar(diff.cn))}</div>}
+        {settings.calendar === 'vn' && cal?.remapped && <div className="tv-warn" style={{ marginTop: 6 }}>{P.vnCalendarUsed(fmtLunar(diff.vn))}</div>}
+        {settings.calendar === 'vn' && cal?.unavailable && <div className="tv-warn" style={{ marginTop: 6 }}>{P.vnCalendarUnavailable(fmtLunar(diff.vn))}</div>}
         <div className="no-print" style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 10 }}>
           <button type="button" className="tv-btn tv-btn-primary" onClick={onSave}>{savedId ? `✓ ${P.save}` : P.save}</button>
           <button type="button" className="tv-btn" onClick={() => window.print()}>{P.print}</button>

@@ -2,6 +2,7 @@
 import { generateChart, setBrightnessSchool, type LunarMonthPolicy, type SchoolBrightnessKind } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { LUNAR_YEAR_MIN, LUNAR_YEAR_MAX } from '@/lib/ziwei/lunar-solar';
+import { applyCalendar, type CalendarMode } from '@/lib/calendar/vn-chart';
 
 export class BadRequest extends Error {}
 
@@ -26,7 +27,7 @@ const int = (v: unknown, min: number, max: number, name: string): number => {
 const LEAP: LunarMonthPolicy[] = ['split', 'next-month', 'prev-month', 'origin-month'];
 const BRIGHT: SchoolBrightnessKind[] = ['default', 'XD1', 'XD2', 'ZZ'];
 
-export interface ChartOptions { leapMonth: LunarMonthPolicy; brightness: SchoolBrightnessKind }
+export interface ChartOptions { leapMonth: LunarMonthPolicy; brightness: SchoolBrightnessKind; calendar: CalendarMode }
 
 /** Validate a birth payload ({year, month, day, hour, gender} — the chart date after the Tý rule). */
 export function parseBirth(v: unknown): BirthInfo {
@@ -50,14 +51,16 @@ export function parseOptions(v: unknown): ChartOptions {
   const brightness = (o.brightness ?? 'default') as SchoolBrightnessKind;
   if (!LEAP.includes(leapMonth)) throw new BadRequest('Quy ước tháng nhuận không hợp lệ');
   if (!BRIGHT.includes(brightness)) throw new BadRequest('Bảng độ sáng không hợp lệ');
-  return { leapMonth, brightness };
+  const calendar = (o.calendar ?? 'cn') as CalendarMode;
+  if (calendar !== 'cn' && calendar !== 'vn') throw new BadRequest('Lịch không hợp lệ');
+  return { leapMonth, brightness, calendar };
 }
 
 /** Deterministic server-side chart. setBrightnessSchool is a module-global in the engine, so it is
  *  set and restored synchronously around generateChart (no await in between → no interleaving). */
 export function buildChart(birth: BirthInfo, opts: ChartOptions): ZiweiChart {
   setBrightnessSchool(opts.brightness);
-  try { return generateChart(birth, { leapMonth: opts.leapMonth }); }
+  try { return generateChart(applyCalendar(birth, opts.calendar).info, { leapMonth: opts.leapMonth }); }
   finally { setBrightnessSchool('default'); }
 }
 

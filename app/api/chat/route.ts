@@ -7,5 +7,7 @@ export async function POST(req: Request) {
   const body = await req.text();
   let parsed: Record<string, unknown> = {};
   try { parsed = JSON.parse(body); } catch { /* interpret will reject */ }
-  return interpret(new Request(req.url, { method: 'POST', headers: req.headers, body: JSON.stringify({ ...parsed, mode: 'chat' }), signal: req.signal }));
+  const headers = new Headers(req.headers);
+  headers.delete('content-length'); // body is re-serialised below
+  return interpret(new Request(req.url, { method: 'POST', headers, body: JSON.stringify({ ...parsed, mode: 'chat' }), signal: req.signal }));
 }

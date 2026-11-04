@@ -35,6 +35,8 @@ interface BirthFormProps {
   hideSubmit?: boolean;
   /** Late Giờ Tý (23:00–23:59) day rule; default = formToBirthInfo's default ('next-day'). */
   lateZishi?: LateZishiRule;
+  /** Add the equation of time (apparent true solar time). Default false = mean solar time (upstream). */
+  equationOfTime?: boolean;
 }
 
 const OTHER = t.place.otherValue;
@@ -49,7 +51,7 @@ function isValidDate(y: number, m: number, d: number): boolean {
   return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
-export default function BirthForm({ onSubmit, loading, initialData, onFormSave, hideSubmit, lateZishi }: BirthFormProps) {
+export default function BirthForm({ onSubmit, loading, initialData, onFormSave, hideSubmit, lateZishi, equationOfTime }: BirthFormProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -181,7 +183,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     if (hasError) return;
     onFormSave?.({ ...eff });
     // Always go through formToBirthInfo: it owns the late-Giờ-Tý day rollover; a hand-built BirthInfo would bypass it.
-    onSubmit(formToBirthInfo(eff, { lateZishi }));
+    onSubmit(formToBirthInfo(eff, { lateZishi, equationOfTime }));
   };
 
   // ─── Style tokens ───────────────────────────────────────

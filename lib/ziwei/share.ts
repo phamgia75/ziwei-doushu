@@ -1,6 +1,6 @@
 import type { BirthFormState } from '@/components/BirthForm';
 import type { BirthInfo } from './types';
-import { branchFromSolarMinutes, resolveZiweiDayOffset, shiftGregorianDate, type LateZishiRule } from './true-solar-time';
+import { branchFromSolarMinutes, equationOfTimeMinutes, resolveZiweiDayOffset, shiftGregorianDate, type LateZishiRule } from './true-solar-time';
 
 /** 根据钟表时间 + 经度计算真太阳时时辰支 (0-11)；utcOffsetMinutes 默认 480 = 北京时间 */
 export function calcTrueSolarBranch(clockHour: number, clockMinute: number, longitude: number, utcOffsetMinutes = 480): number {
@@ -18,7 +18,7 @@ export function calcTrueSolarBranch(clockHour: number, clockMinute: number, long
  * · 00:00-00:59 = 早子时，按本日排盘
  * 这与「时辰支同为子(0)」并不冲突——子时分早晚两段，需要在日期上区分。
  */
-export function formToBirthInfo(form: BirthFormState, opts?: { lateZishi?: LateZishiRule }): BirthInfo {
+export function formToBirthInfo(form: BirthFormState, opts?: { lateZishi?: LateZishiRule; equationOfTime?: boolean }): BirthInfo {
   let y = parseInt(form.year) || 0;
   let m = parseInt(form.month) || 0;
   let d = parseInt(form.day) || 0;
@@ -29,7 +29,10 @@ export function formToBirthInfo(form: BirthFormState, opts?: { lateZishi?: LateZ
   if (!form.unknownTime) {
     // TuVi AI: clock time may be in any standard zone (Vietnam = UTC+7). Meridian = offset/4; default 480 keeps upstream (Beijing) math.
     const meridian = (form.utcOffsetMinutes ?? 480) / 4;
-    const solar = (parseInt(form.clockHour) || 0) * 60 + (parseInt(form.clockMinute) || 0) + (form.longitude - meridian) * 4;
+    const ch = parseInt(form.clockHour) || 0, cm = parseInt(form.clockMinute) || 0;
+    // TuVi AI option: apparent solar time (adds the equation of time, ±16 min) — only when a birthplace is known.
+    const eot = opts?.equationOfTime && form.province && y > 0 && m > 0 && d > 0 ? equationOfTimeMinutes(y, m, d, ch, cm) : 0;
+    const solar = ch * 60 + cm + (form.longitude - meridian) * 4 + eot;
     const normalizedMinutes = ((solar % 1440) + 1440) % 1440;
     hour = branchFromSolarMinutes(normalizedMinutes);
     const dayOffset = resolveZiweiDayOffset({ dayOffset: Math.floor(solar / 1440), normalizedMinutes, branch: hour }, opts?.lateZishi);
