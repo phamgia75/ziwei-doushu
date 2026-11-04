@@ -12,7 +12,11 @@
     "check:i18n": "tsx scripts/i18n/check-ui-strings.ts",
     "dataset:fetch": "tsx scripts/dataset/fetch.ts",
     "test:e2e": "playwright test --grep-invert @ai",
-    "test:e2e:ai": "playwright test --grep @ai --project desktop"
+    "test:e2e:ai": "playwright test --grep @ai --project desktop",
+    "check:secrets": "node scripts/security/scan-secrets.mjs",
+    "check:audit": "npm audit --audit-level=moderate",
+    "start:local": "./scripts/start.sh",
+    "stop:local": "./scripts/stop.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.27.0",
