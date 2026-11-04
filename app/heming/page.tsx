@@ -1,13 +1,15 @@
 'use client';
 import { useState, useCallback, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import BirthForm, { type BirthFormState } from '@/components/BirthForm';
 import { formToBirthInfo } from '@/lib/ziwei/share';
 import { generateChart as buildChart } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, ZiweiChart } from '@/lib/ziwei/types';
 import { useTheme } from '@/components/ThemeProvider';
+import SiteHeader from '@/components/SiteHeader';
+import { term, STEMS_VI, BRANCHES_VI } from '@/lib/i18n';
+import { heming as H } from '@/lib/i18n/vi/heming';
 
-// ─── AiContent 渲染器（与 InsightPanel 一致）────────────────
+// AI text renderer (same format as InsightPanel)
 function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
   const lines = text.split('\n');
   return (
@@ -48,29 +50,25 @@ function AiContent({ text, streaming }: { text: string; streaming?: boolean }) {
 }
 
 export default function HemingPage() {
-  const router = useRouter();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // ─── 双方命盘状态 ─────────────────────────────────────────
   const [chartA, setChartA] = useState<ZiweiChart | null>(null);
   const [chartB, setChartB] = useState<ZiweiChart | null>(null);
-  // 双方表单状态由 BirthForm onFormSave 同步到此处，统一按钮触发起盘
+  // BirthForm onFormSave syncs both forms here; one button generates both charts.
   const [formA, setFormA] = useState<BirthFormState | null>(null);
   const [formB, setFormB] = useState<BirthFormState | null>(null);
 
-  // ─── AI 合盘分析状态 ─────────────────────────────────────
   const [analysis, setAnalysis] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [question, setQuestion] = useState('');
   const [analysisError, setAnalysisError] = useState(false);
-  // 开源版不含 /api/heming：接口 404 时单独说明，而不是让用户反复重试
+  // /api/heming answered 404 (backend/AI not available): show a setup hint instead of "retry".
   const [apiMissing, setApiMissing] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const analysisRef = useRef<HTMLDivElement>(null);
 
-  // ─── 起盘（单次调用，返回 chart 给统一流程使用）──────────
-  // 开源版不含后端 /api/generate：直接用本仓库的排盘引擎在浏览器里起盘
+  // Charts are generated in the browser with the local engine.
   const generateChart = useCallback(async (info: BirthInfo): Promise<ZiweiChart | null> => {
     try {
       return buildChart(info);
@@ -87,7 +85,7 @@ export default function HemingPage() {
   const runAnalysis = useCallback(async (q?: string) => {
     setFormError(null);
     if (!isFormReady(formA) || !isFormReady(formB)) {
-      setFormError('请先填写双方完整出生信息');
+      setFormError(H.formIncomplete);
       return;
     }
     setAnalyzing(true);
@@ -156,75 +154,42 @@ export default function HemingPage() {
   };
 
   const labelStyle = {
-    fontSize: '10px', letterSpacing: '0.4em', color: 'var(--ac)', opacity: 0.7,
+    fontSize: '12px', letterSpacing: '0.08em', color: 'var(--ac)', fontWeight: 600,
     marginBottom: '16px', display: 'block',
   };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-0)' }}>
-      {/* 顶栏 */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: isDark ? 'rgba(2,8,16,0.88)' : 'rgba(250,245,235,0.92)',
-        backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: '1px solid var(--bdr)',
-        display: 'flex', alignItems: 'center', padding: '0 24px', height: '52px', gap: '16px',
-      }}>
-        <button
-          onClick={() => router.push('/')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '4px', fontSize: '13px',
-            color: 'var(--tx-3)', background: 'none', border: 'none', cursor: 'pointer',
-          }}
-        >
-          <span style={{ fontSize: '16px' }}>‹</span>
-          <span>返回</span>
-        </button>
-        <div style={{ width: '1px', height: '20px', background: 'var(--bdr-med)' }} />
-        <span style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em' }}>合盘分析</span>
-        <div style={{ flex: 1 }} />
-        <span style={{ fontSize: '11px', color: 'var(--tx-3)' }}>感情 · 合伙 · 亲子 · 朋友</span>
-      </header>
+      <SiteHeader />
 
-      {/* 主体 */}
-      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 24px 80px' }}>
-
-        {/* 标题 */}
-        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
-          <div style={{ fontSize: '28px', color: 'var(--ac)', opacity: 0.15, marginBottom: '12px' }}>☯</div>
-          <h1 style={{ fontSize: '22px', fontWeight: 600, letterSpacing: '0.15em', color: 'var(--tx-0)', marginBottom: '8px' }}>
-            紫微合盘
+      <div style={{ maxWidth: '1100px', margin: '0 auto', padding: '32px 16px 80px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 600, color: 'var(--tx-0)', marginBottom: '6px', fontFamily: 'var(--font-serif)' }}>
+            {H.title}
           </h1>
-          <p style={{ fontSize: '13px', color: 'var(--tx-3)', lineHeight: 1.6 }}>
-            输入两个人的出生信息，AI 基于倪海厦体系分析双方命盘的缘分匹配度、感情走向与相处建议
-          </p>
+          <div style={{ fontSize: '12px', color: 'var(--ac)', marginBottom: '8px' }}>{H.subtitle}</div>
+          <p style={{ fontSize: '14px', color: 'var(--tx-3)', lineHeight: 1.6, maxWidth: '640px', margin: '0 auto' }}>{H.intro}</p>
         </div>
 
-        {/* 双栏表单 */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }}
           className="heming-grid">
-          {/* 甲方 */}
           <div style={cardStyle}>
-            <span style={labelStyle}>甲方 — A</span>
-            <BirthForm
-              hideSubmit
-              onSubmit={() => {}}
-              onFormSave={setFormA}
-            />
+            <span style={labelStyle}>{H.personA}</span>
+            <BirthForm hideSubmit onSubmit={() => {}} onFormSave={setFormA} />
           </div>
-
-          {/* 乙方 */}
           <div style={cardStyle}>
-            <span style={labelStyle}>乙方 — B</span>
-            <BirthForm
-              hideSubmit
-              onSubmit={() => {}}
-              onFormSave={setFormB}
-            />
+            <span style={labelStyle}>{H.personB}</span>
+            <BirthForm hideSubmit onSubmit={() => {}} onFormSave={setFormB} />
           </div>
         </div>
 
-        {/* ═══ 大合盘分析框（视觉中心，始终显示）════════════════ */}
+        {chartA && chartB && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '24px' }} className="heming-grid">
+            <ChartFacts label={H.personA} chart={chartA} style={cardStyle} />
+            <ChartFacts label={H.personB} chart={chartB} style={cardStyle} />
+          </div>
+        )}
+
         <div ref={analysisRef} style={{
           ...cardStyle,
           minHeight: '320px',
@@ -233,112 +198,81 @@ export default function HemingPage() {
           flexDirection: 'column',
           justifyContent: (!analysis && !analyzing) ? 'center' : 'flex-start',
         }}>
-          {/* 区块标题 */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: (analysis || analyzing) ? '20px' : '24px' }}>
             <span style={{ color: 'var(--ac)', opacity: 0.6 }}>◉</span>
-            <span style={{ fontSize: '11px', letterSpacing: '0.3em', color: 'var(--tx-3)' }}>合盘分析 · HEMING</span>
+            <span style={{ fontSize: '12px', letterSpacing: '0.08em', color: 'var(--tx-3)' }}>{H.sectionTitle}</span>
           </div>
 
-          {/* 状态分支 */}
           {!analysis && !analyzing && (
             <div style={{ textAlign: 'center', padding: '32px 0' }}>
-              <div style={{ fontSize: '13px', color: 'var(--tx-3)', marginBottom: '24px', lineHeight: 1.7 }}>
-                填好双方出生信息后，点击下方按钮<br />
-                AI 将基于倪海厦体系深度分析两人缘分匹配度
-              </div>
+              <div style={{ fontSize: '14px', color: 'var(--tx-3)', marginBottom: '24px', lineHeight: 1.7 }}>{H.emptyHint}</div>
               <button
                 onClick={() => runAnalysis()}
+                className="no-print"
                 style={{
                   padding: '14px 40px', borderRadius: 'var(--r-pill)', border: 'none',
                   background: 'linear-gradient(135deg, #9a6210, #c88020)',
-                  color: '#fff8e8', fontSize: '14px', fontWeight: 600,
-                  letterSpacing: '0.15em', cursor: 'pointer',
-                  boxShadow: '0 4px 16px rgba(140,100,20,0.25)',
-                  transition: 'transform 0.15s',
+                  color: '#fff8e8', fontSize: '15px', fontWeight: 600,
+                  cursor: 'pointer', boxShadow: '0 4px 16px rgba(140,100,20,0.25)',
                 }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-1px)'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(0)'; }}
               >
-                开始合盘分析
+                {H.start}
               </button>
-              {formError && (
-                <div style={{ marginTop: '20px', fontSize: '13px', color: '#dc2626' }}>
-                  {formError}
-                </div>
-              )}
+              {formError && <div style={{ marginTop: '20px', fontSize: '14px', color: '#dc2626' }}>{formError}</div>}
             </div>
           )}
 
           {analyzing && !analysis && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '40px 0', color: 'var(--tx-3)', fontSize: '13px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '40px 0', color: 'var(--tx-3)', fontSize: '14px' }}>
               <div style={{
                 width: '14px', height: '14px',
                 border: '2px solid var(--bdr-med)', borderTopColor: 'var(--ac)',
                 borderRadius: '50%', animation: 'spin 0.8s linear infinite',
               }} />
-              正在对比双方命盘…
+              {H.comparing}
             </div>
           )}
 
           {analysis && <AiContent text={analysis} streaming={analyzing} />}
 
           {analysisError && (
-            <div style={{ padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--bdr)', background: 'var(--bg-card)', fontSize: '13px', color: 'var(--tx-2)', marginTop: '12px' }}>
-              {apiMissing
-                ? '开源版不含合盘 AI 分析接口（/api/heming），需要你自己实现后才能用。两人的命盘可以分别到「排盘」页（/chart）查看。'
-                : '分析暂时不可用，请重试。'}
+            <div role="alert" style={{ padding: '12px 16px', borderRadius: '10px', border: '1px solid var(--bdr)', background: 'var(--bg-card)', fontSize: '14px', color: 'var(--tx-2)', marginTop: '12px' }}>
+              {apiMissing ? <>{H.apiMissing} <a href="/settings" style={{ color: 'var(--ac)' }}>→</a></> : H.failed}
             </div>
           )}
         </div>
 
-        {/* ═══ 针对合盘的追问聊天框（仅分析完成后显示）═══════════ */}
         {analysis && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
-            <div style={{ fontSize: '11px', letterSpacing: '0.2em', color: 'var(--tx-3)', marginBottom: '4px' }}>
-              针对此次合盘继续追问
-            </div>
-
-            {/* 快捷问题 */}
+          <div className="no-print" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '16px' }}>
+            <div style={{ fontSize: '12px', color: 'var(--tx-3)', marginBottom: '4px' }}>{H.followUpTitle}</div>
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {[
-                '感情匹配度如何？',
-                '适合合伙创业吗？',
-                '两人结婚是否合适？',
-                '哪方面最容易产生矛盾？',
-                '财运是否互补？',
-              ].map(q => (
+              {H.quickQuestions.map(q => (
                 <button
                   key={q}
                   onClick={() => { setQuestion(q); runAnalysis(q); }}
                   disabled={analyzing}
                   style={{
-                    fontSize: '12px', padding: '6px 14px',
-                    borderRadius: 'var(--r-pill)',
-                    border: '1px solid var(--bdr-med)',
+                    fontSize: '13px', padding: '6px 14px',
+                    borderRadius: 'var(--r-pill)', border: '1px solid var(--bdr-med)',
                     background: 'transparent', color: 'var(--tx-2)',
-                    cursor: analyzing ? 'not-allowed' : 'pointer',
-                    opacity: analyzing ? 0.5 : 1,
-                    transition: 'border-color 0.15s',
+                    cursor: analyzing ? 'not-allowed' : 'pointer', opacity: analyzing ? 0.5 : 1,
                   }}
-                  onMouseEnter={e => { if (!analyzing) (e.currentTarget as HTMLElement).style.borderColor = 'var(--ac-bdr)'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--bdr-med)'; }}
                 >
                   {q}
                 </button>
               ))}
             </div>
-
-            {/* 输入框 + 追问按钮 */}
             <div style={{ display: 'flex', gap: '8px' }}>
               <input
                 type="text"
                 value={question}
                 onChange={e => setQuestion(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && !analyzing) runAnalysis(question || undefined); }}
-                placeholder="继续追问，如：哪几年是两人感情关键期？"
+                placeholder={H.placeholder}
+                aria-label={H.followUpTitle}
                 disabled={analyzing}
                 className="input-base"
-                style={{ fontSize: '13px', flex: 1 }}
+                style={{ fontSize: '14px', flex: 1 }}
               />
               <button
                 onClick={() => runAnalysis(question || undefined)}
@@ -346,13 +280,12 @@ export default function HemingPage() {
                 style={{
                   padding: '10px 20px', borderRadius: 'var(--r-sm)', border: 'none',
                   background: analyzing ? 'var(--bg-2)' : 'var(--tx-0)',
-                  color: analyzing ? 'var(--tx-3)' : 'white',
-                  fontSize: '13px', fontWeight: 500,
-                  cursor: analyzing ? 'not-allowed' : 'pointer',
-                  transition: 'all 0.15s', whiteSpace: 'nowrap',
+                  color: analyzing ? 'var(--tx-3)' : 'var(--bg-0)',
+                  fontSize: '14px', fontWeight: 500,
+                  cursor: analyzing ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap',
                 }}
               >
-                {analyzing ? '分析中…' : '继续追问'}
+                {analyzing ? H.analyzing : H.ask}
               </button>
             </div>
           </div>
@@ -364,6 +297,25 @@ export default function HemingPage() {
           .heming-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
+    </div>
+  );
+}
+
+/** Key facts of one chart, shown in Vietnamese via term(). */
+function ChartFacts({ label, chart, style }: { label: string; chart: ZiweiChart; style: React.CSSProperties }) {
+  const ming = chart.palaces.find(p => p.isMingGong) ?? chart.palaces.find(p => p.branch === chart.mingGongBranch);
+  const major = ming?.stars.filter(s => s.type === 'major') ?? [];
+  return (
+    <div className="print-avoid-break" style={{ ...style, padding: '16px 20px' }}>
+      <div style={{ fontSize: '12px', color: 'var(--ac)', fontWeight: 600, marginBottom: '6px' }}>{label} · {H.factsTitle}</div>
+      <div style={{ fontSize: '14px', color: 'var(--tx-1)', lineHeight: 1.7 }}>
+        {H.mingPalace}{ming ? ` (${STEMS_VI[ming.stem]} ${BRANCHES_VI[ming.branch]})` : ''}:{' '}
+        <strong>{major.length ? major.map(s => term(s.name) + (s.siHua ? ` ${term(`化${s.siHua}`)}` : '')).join(', ') : H.noMajor}</strong>
+        <br />
+        {term('五行局')}: {term(chart.wuxingJuName)}
+        {chart.mingZhu && <> · {term('命主')}: {term(chart.mingZhu)}</>}
+        {chart.shenZhu && <> · {term('身主')}: {term(chart.shenZhu)}</>}
+      </div>
     </div>
   );
 }

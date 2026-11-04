@@ -1,26 +1,25 @@
-/**
- * /library/[book]/[chapter] — 单章节阅读页
- */
-
+/** /library/[book]/[chapter] — one chapter, original Chinese text. */
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import SiteHeader from '@/components/SiteHeader';
+import { common } from '@/lib/i18n';
+import { library as L, BOOK_VI } from '@/lib/i18n/vi/library';
 import { ALL_BOOKS, getChapter } from '@/lib/classics';
 
 export async function generateStaticParams() {
-  return ALL_BOOKS.flatMap(b =>
-    b.chapters.map((_, i) => ({ book: b.slug, chapter: String(i) }))
-  );
+  return ALL_BOOKS.flatMap(b => b.chapters.map((_, i) => ({ book: b.slug, chapter: String(i) })));
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ book: string; chapter: string }> }) {
   const { book: bookSlug, chapter: chIdx } = await params;
-  const result = getChapter(bookSlug, parseInt(chIdx));
-  if (!result) return {};
-  return {
-    title: `${result.chapter.title} · 《${result.book.title}》· 紫微斗数古籍`,
-    description: result.chapter.subtitle || `《${result.book.title}》${result.chapter.title}原文`,
-  };
+  const vi = BOOK_VI[bookSlug];
+  if (!vi || !getChapter(bookSlug, parseInt(chIdx))) return {};
+  return { title: `${vi.title} · ${parseInt(chIdx) + 1} · ${common.appName}` };
 }
+
+const navCard = {
+  flex: 1, padding: '12px 16px', textDecoration: 'none', color: 'var(--tx-0)',
+} as const;
 
 export default async function ChapterPage({ params }: { params: Promise<{ book: string; chapter: string }> }) {
   const { book: bookSlug, chapter: chIdx } = await params;
@@ -28,147 +27,58 @@ export default async function ChapterPage({ params }: { params: Promise<{ book: 
   if (!result) notFound();
 
   const { book, chapter, chapterIdx } = result;
+  const vi = BOOK_VI[book.slug];
   const prevIdx = chapterIdx - 1;
   const nextIdx = chapterIdx + 1;
 
   return (
-    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      <div className="px-6 py-4 flex items-center justify-between"
-        style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
-        <Link href={`/library/${book.slug}`} style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>
-          ← 《{book.title}》目录
-        </Link>
-        <div style={{ fontSize: '12px', color: 'var(--tx-3)', letterSpacing: '0.15em' }}>
-          {chapter.title}
-        </div>
-        <Link href="/library" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em', textDecoration: 'none' }}>
-          古籍库 →
-        </Link>
-      </div>
+    <div style={{ background: 'var(--bg-0)', minHeight: '100vh' }}>
+      <SiteHeader />
+      <article className="page-main" style={{ maxWidth: '760px' }}>
+        <nav className="page-note no-print"><Link href={`/library/${book.slug}`}>{L.backToBook(vi?.title ?? '')}</Link></nav>
+        <div className="page-note" style={{ marginTop: '12px' }}>{vi?.title} · {vi?.dynasty}</div>
+        <h1 lang="zh">{chapter.title}</h1>
+        {chapter.subtitle && <p lang="zh">{chapter.subtitle}</p>}
 
-      <article className="max-w-3xl mx-auto px-6 py-12">
-        {/* 标题 */}
-        <div className="text-center mb-10">
-          <div style={{ fontSize: '11px', color: 'var(--tx-3)', letterSpacing: '0.25em', marginBottom: '8px' }}>
-            《{book.title}》· {book.dynasty}
-          </div>
-          <h1 style={{ fontSize: 'clamp(24px, 3.5vw, 36px)', fontWeight: 700, color: 'var(--tx-0)', letterSpacing: '0.15em', marginBottom: '8px' }}>
-            {chapter.title}
-          </h1>
-          {chapter.subtitle && (
-            <div style={{ fontSize: '13px', color: 'var(--tx-2)', letterSpacing: '0.1em' }}>
-              {chapter.subtitle}
-            </div>
-          )}
-        </div>
+        {/* On-demand AI translation of this chapter is mounted here. */}
+        <div id="chapter-translation" className="no-print" data-book={book.slug} data-chapter={chapterIdx} />
 
-        {/* 段落 */}
-        <div style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid rgba(184,146,42,0.2)', padding: '32px 28px' }}>
+        <p className="page-note" style={{ margin: '16px 0 8px' }}>{L.originalNote}</p>
+        <div className="card-flat" style={{ padding: '24px 22px' }}>
           {chapter.paragraphs.map((p, i) => (
-            <div
-              key={p.id}
-              id={p.id}
-              style={{
-                marginBottom: i === chapter.paragraphs.length - 1 ? 0 : '20px',
-                paddingBottom: i === chapter.paragraphs.length - 1 ? 0 : '20px',
-                borderBottom: i === chapter.paragraphs.length - 1 ? 'none' : '1px dashed rgba(184,146,42,0.15)',
-                scrollMarginTop: '80px',
-              }}
-            >
-              <div style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '12px',
-              }}>
-                <span style={{
-                  fontSize: '11px',
-                  color: 'var(--ac)',
-                  fontWeight: 600,
-                  letterSpacing: '0.1em',
-                  minWidth: '24px',
-                }}>
-                  {String(p.idx).padStart(2, '0')}
-                </span>
-                <p style={{
-                  flex: 1,
-                  fontSize: '16px',
-                  color: 'var(--tx-0)',
-                  lineHeight: 2,
-                  letterSpacing: '0.04em',
-                  fontFamily: '"PingFang SC", "Hiragino Sans GB", serif',
-                }}>
-                  {p.text}
-                </p>
+            <div key={p.id} id={p.id} className="print-avoid-break"
+              style={{ scrollMarginTop: '80px', ...(i < chapter.paragraphs.length - 1 ? { marginBottom: '18px', paddingBottom: '18px', borderBottom: '1px dashed var(--bdr-med)' } : {}) }}>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <span style={{ fontSize: '11px', color: 'var(--ac)', fontWeight: 600, minWidth: '24px' }}>{String(p.idx).padStart(2, '0')}</span>
+                <p lang="zh" style={{ flex: 1, fontSize: '17px', color: 'var(--tx-0)', lineHeight: 2, letterSpacing: '0.04em' }}>{p.text}</p>
               </div>
               {p.translation && (
-                <div style={{
-                  marginTop: '8px',
-                  marginLeft: '36px',
-                  padding: '8px 12px',
-                  background: 'rgba(184,146,42,0.05)',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  color: 'var(--tx-2)',
-                  lineHeight: 1.8,
-                }}>
-                  <span style={{ fontSize: '10px', color: 'var(--ac)', marginRight: '6px' }}>白话</span>
-                  {p.translation}
+                <div style={{ margin: '8px 0 0 36px', padding: '8px 12px', background: 'var(--ac-bg)', borderRadius: '6px', fontSize: '14px', lineHeight: 1.8 }}>
+                  <span style={{ fontSize: '11px', color: 'var(--ac)', marginRight: '6px' }}>{L.translationLabel}</span>
+                  <span lang="zh">{p.translation}</span>
                 </div>
               )}
               {p.niNote && (
-                <div style={{
-                  marginTop: '8px',
-                  marginLeft: '36px',
-                  padding: '8px 12px',
-                  background: 'rgba(196,90,45,0.05)',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  color: 'var(--tx-2)',
-                  lineHeight: 1.8,
-                }}>
-                  <span style={{ fontSize: '10px', color: 'var(--ji)', marginRight: '6px' }}>倪师注</span>
-                  {p.niNote}
+                <div style={{ margin: '8px 0 0 36px', padding: '8px 12px', background: 'rgba(196,90,45,0.06)', borderRadius: '6px', fontSize: '14px', lineHeight: 1.8 }}>
+                  <span style={{ fontSize: '11px', color: 'var(--ji)', marginRight: '6px' }}>{L.niNoteLabel}</span>
+                  <span lang="zh">{p.niNote}</span>
                 </div>
               )}
             </div>
           ))}
         </div>
 
-        {/* 章节导航 */}
-        <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
+        <div className="no-print" style={{ marginTop: '20px', display: 'flex', gap: '12px' }}>
           {prevIdx >= 0 ? (
-            <Link
-              href={`/library/${book.slug}/${prevIdx}`}
-              style={{
-                flex: 1,
-                padding: '14px 18px',
-                background: 'var(--bg-card)',
-                border: '1px solid rgba(184,146,42,0.2)',
-                borderRadius: '10px',
-                textDecoration: 'none',
-                color: 'var(--tx-0)',
-              }}
-            >
-              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.2em', marginBottom: '2px' }}>← 上一章</div>
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>{book.chapters[prevIdx].title}</div>
+            <Link href={`/library/${book.slug}/${prevIdx}`} className="card-flat" style={navCard}>
+              <div className="page-note">{L.prev}</div>
+              <div lang="zh" style={{ fontSize: '14px' }}>{book.chapters[prevIdx].title}</div>
             </Link>
           ) : <div style={{ flex: 1 }} />}
           {nextIdx < book.chapters.length ? (
-            <Link
-              href={`/library/${book.slug}/${nextIdx}`}
-              style={{
-                flex: 1,
-                padding: '14px 18px',
-                background: 'var(--bg-card)',
-                border: '1px solid rgba(184,146,42,0.2)',
-                borderRadius: '10px',
-                textDecoration: 'none',
-                color: 'var(--tx-0)',
-                textAlign: 'right',
-              }}
-            >
-              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.2em', marginBottom: '2px' }}>下一章 →</div>
-              <div style={{ fontSize: '13px', fontWeight: 500 }}>{book.chapters[nextIdx].title}</div>
+            <Link href={`/library/${book.slug}/${nextIdx}`} className="card-flat" style={{ ...navCard, textAlign: 'right' }}>
+              <div className="page-note">{L.next}</div>
+              <div lang="zh" style={{ fontSize: '14px' }}>{book.chapters[nextIdx].title}</div>
             </Link>
           ) : <div style={{ flex: 1 }} />}
         </div>

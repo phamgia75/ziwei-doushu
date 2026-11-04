@@ -16,6 +16,10 @@ import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 const HAN = /\p{Script=Han}/u;
+/** Upstream components kept for merge-compatibility but never rendered by TuVi AI.
+ *  tests/unit/unused-upstream-not-imported.test.ts fails if any of them gets imported. */
+export const UNUSED_UPSTREAM = ['components/ScrollIntro.tsx', 'components/AnnouncementModal.tsx', 'components/ShareModal.tsx',
+  'components/ShareCardCanvas.tsx', 'components/FamousPersonCard.tsx', 'components/ChatPanel.tsx', 'components/StarField.tsx'];
 const KEY_FUNCS = new Set(['term', 'hasTerm', 'tChar', 'substituteTerms', 'glossaryFor']);
 const root = process.cwd();
 

@@ -9,9 +9,9 @@ import { STAR_DB } from '@/lib/ziwei/db-analysis';
 import type { TopicKey } from '@/lib/ziwei/db-analysis';
 import { TOPIC_PALACE_NAME, TOPIC_LABEL } from '@/lib/ziwei/db-analysis';
 
-export const ALL_STARS = [
-  '紫微', '天机', '太阳', '武曲', '天同', '廉贞', '天府',
-  '太阴', '贪狼', '巨门', '天相', '天梁', '七杀', '破军',
+export const ALL_STARS = [ // i18n-ok: engine star identifiers, displayed via term()
+  '紫微', '天机', '太阳', '武曲', '天同', '廉贞', '天府', // i18n-ok: engine star identifiers
+  '太阴', '贪狼', '巨门', '天相', '天梁', '七杀', '破军', // i18n-ok: engine star identifiers
 ];
 
 // 主星名 ↔ 拼音 slug 映射（URL 用 slug，避免中文 URL 在 Vercel/CDN 上的边界问题）
@@ -85,6 +85,7 @@ interface ParsedContent {
 function parseStarContent(content: string): ParsedContent {
   const out: ParsedContent = { dingdiao: '', lundian: '', yiju: '', chuchu: '', raw: content, hasMarkers: false };
   if (!content) return out;
+  // i18n-ok: section markers in the source dataset text, not displayed
   if (!content.includes('**【一句话定调】**') && !content.includes('**【核心论断】**')) {
     out.lundian = content;
     return out;
@@ -143,20 +144,20 @@ export function getAllKnowledgeRoutes() {
   return routes;
 }
 
-/** 主星属性简介（用于 SEO 页"了解 XX 星"section） */
+/** Short Vietnamese profile of each major star (shown on /knowledge). Keys are engine identifiers. */
 export const STAR_BRIEF_SEO: Record<string, string> = {
-  '紫微': '紫微为帝星，主尊贵，化气为尊。落命主有领导气场、宜大平台高位。',
-  '天机': '天机为智慧星，主善变机灵，化气为善。落命主聪明机变、宜辅佐策划。',
-  '太阳': '太阳为男贵星，主名誉公务，化气为贵。落命主光明磊落、宜公职名声。',
-  '武曲': '武曲为财星，主刚毅果决，化气为财。落命主理财能力强、宜实业金融。',
-  '天同': '天同为福星，主温和享乐，化气为福。落命主性情温和、有福气。',
-  '廉贞': '廉贞为次桃花星，文武兼备，化气为囚。落命主多才多艺、感情丰富。',
-  '天府': '天府为南帝守财星，主稳重保守，化气为令。落命主品行端正、善守财库。',
-  '太阴': '太阴为月亮富贵星，主田宅富贵，化气为富。落命主感情细腻、女命最吉。',
-  '贪狼': '贪狼为桃花欲望星，多才多社交，化气为桃花。落命主多才艺、社交广。',
-  '巨门': '巨门为是非口才星，主辩论传媒，化气为暗。落命主口才好、宜律师教师。',
-  '天相': '天相为印星辅佐，主忠厚老实，化气为印。落命主品行端正、宜行政法务。',
-  '天梁': '天梁为老人星荫星，善逢凶化吉，化气为荫。落命主慈悲善良、宜法律医学。',
-  '七杀': '七杀为将星，主孤独果决冒险，化气为肃杀。落命主刚毅果决、宜军警创业。',
-  '破军': '破军为破坏创新星，主六亲缘薄，化气为耗。落命主开创变动、宜技术专长。',
+  '紫微': 'Tử Vi là đế tinh, chủ tôn quý, hóa khí là Tôn. Đóng cung Mệnh: có khí chất lãnh đạo, hợp với vị trí cao, môi trường lớn.',
+  '天机': 'Thiên Cơ là sao trí tuệ, chủ linh hoạt, hay biến đổi, hóa khí là Thiện. Đóng cung Mệnh: thông minh, nhanh nhạy, hợp vai trò tham mưu, hoạch định.',
+  '太阳': 'Thái Dương là quý tinh của nam, chủ danh dự và việc công, hóa khí là Quý. Đóng cung Mệnh: quang minh lỗi lạc, hợp công chức, nghề cần danh tiếng.',
+  '武曲': 'Vũ Khúc là tài tinh, chủ cương nghị quyết đoán, hóa khí là Tài. Đóng cung Mệnh: giỏi quản lý tiền bạc, hợp kinh doanh thực nghiệp, tài chính.',
+  '天同': 'Thiên Đồng là phúc tinh, chủ ôn hòa, hưởng thụ, hóa khí là Phúc. Đóng cung Mệnh: tính tình hiền hòa, có phúc khí.',
+  '廉贞': 'Liêm Trinh là thứ đào hoa tinh, văn võ kiêm toàn, hóa khí là Tù. Đóng cung Mệnh: đa tài đa nghệ, tình cảm phong phú.',
+  '天府': 'Thiên Phủ là nam đế, sao giữ kho, chủ ổn trọng, bảo thủ, hóa khí là Lệnh. Đóng cung Mệnh: phẩm hạnh đoan chính, giỏi giữ của.',
+  '太阴': 'Thái Âm là sao mặt trăng, chủ phú quý và điền trạch, hóa khí là Phú. Đóng cung Mệnh: tình cảm tinh tế; nữ mệnh gặp là tốt nhất.',
+  '贪狼': 'Tham Lang là sao đào hoa và dục vọng, đa tài, giỏi giao tiếp, hóa khí là Đào Hoa. Đóng cung Mệnh: nhiều tài nghệ, quan hệ rộng.',
+  '巨门': 'Cự Môn là sao thị phi và khẩu tài, chủ tranh biện, truyền thông, hóa khí là Ám. Đóng cung Mệnh: ăn nói giỏi, hợp nghề luật sư, giáo viên.',
+  '天相': 'Thiên Tướng là ấn tinh phụ tá, chủ trung hậu thật thà, hóa khí là Ấn. Đóng cung Mệnh: phẩm hạnh đoan chính, hợp hành chính, pháp vụ.',
+  '天梁': 'Thiên Lương là sao người già, ấm tinh, giỏi gặp hung hóa cát, hóa khí là Ấm. Đóng cung Mệnh: từ bi lương thiện, hợp ngành luật, y.',
+  '七杀': 'Thất Sát là tướng tinh, chủ cô độc, quyết đoán, mạo hiểm, hóa khí là Túc Sát. Đóng cung Mệnh: cương nghị, hợp quân đội, cảnh sát, khởi nghiệp.',
+  '破军': 'Phá Quân là sao phá cũ đổi mới, chủ duyên lục thân mỏng, hóa khí là Hao. Đóng cung Mệnh: thích khai phá, biến động, hợp chuyên môn kỹ thuật.',
 };

@@ -1,9 +1,10 @@
-/**
- * /library/[book] — 单部古籍目录页
- */
-
+/** /library/[book] — table of contents of one book. */
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import SiteHeader from '@/components/SiteHeader';
+import Zh from '@/components/Zh';
+import { common } from '@/lib/i18n';
+import { library as L, BOOK_VI } from '@/lib/i18n/vi/library';
 import { ALL_BOOKS, getBookBySlug } from '@/lib/classics';
 
 export async function generateStaticParams() {
@@ -12,90 +13,42 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ book: string }> }) {
   const { book: slug } = await params;
-  const book = getBookBySlug(slug);
-  if (!book) return {};
-  return {
-    title: `《${book.title}》· ${book.dynasty} · 紫微斗数古籍原典库`,
-    description: book.intro,
-  };
+  const vi = BOOK_VI[slug];
+  return vi ? { title: `${vi.title} · ${L.title} · ${common.appName}` } : {};
 }
 
 export default async function BookPage({ params }: { params: Promise<{ book: string }> }) {
   const { book: slug } = await params;
   const book = getBookBySlug(slug);
   if (!book) notFound();
+  const vi = BOOK_VI[slug];
 
   return (
-    <div style={{ background: 'var(--bg-page)', minHeight: '100vh' }}>
-      <div className="px-6 py-4 flex items-center justify-between"
-        style={{ borderBottom: '1px solid rgba(184,146,42,0.15)', background: 'var(--bg-page)' }}>
-        <Link href="/library" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.3em', textDecoration: 'none' }}>
-          ← 古籍库
-        </Link>
-        <div style={{ fontSize: '12px', color: 'var(--tx-3)', letterSpacing: '0.2em' }}>
-          《{book.title}》
-        </div>
-        <Link href="/" style={{ fontSize: '12px', color: 'var(--ac)', letterSpacing: '0.2em', textDecoration: 'none' }}>
-          首页 →
-        </Link>
-      </div>
+    <div style={{ background: 'var(--bg-0)', minHeight: '100vh' }}>
+      <SiteHeader />
+      <main className="page-main" style={{ maxWidth: '760px' }}>
+        <nav className="page-note no-print"><Link href="/library">{L.backToLibrary}</Link></nav>
+        <div className="page-note" style={{ marginTop: '12px' }}>{vi?.dynasty} · {vi?.author}</div>
+        <h1>{vi?.title}<Zh>{book.title}</Zh></h1>
+        <p>{vi?.intro}</p>
 
-      <div className="max-w-3xl mx-auto px-6 py-12">
-        {/* 书名信息 */}
-        <div className="text-center mb-12">
-          <div style={{ fontSize: '11px', color: 'var(--tx-3)', letterSpacing: '0.3em', marginBottom: '8px' }}>
-            {book.dynasty} · {book.author}
-          </div>
-          <h1 style={{ fontSize: 'clamp(28px, 4vw, 42px)', fontWeight: 700, color: 'var(--tx-0)', letterSpacing: '0.15em', marginBottom: '14px' }}>
-            《{book.title}》
-          </h1>
-          <p style={{ fontSize: '13px', color: 'var(--tx-2)', lineHeight: 1.8, maxWidth: '500px', margin: '0 auto' }}>
-            {book.intro}
-          </p>
-        </div>
-
-        {/* 章节目录 */}
-        <div style={{ background: 'var(--bg-card)', borderRadius: '14px', border: '1px solid rgba(184,146,42,0.2)', overflow: 'hidden' }}>
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid rgba(184,146,42,0.15)', fontSize: '11px', color: 'var(--tx-3)', letterSpacing: '0.3em' }}>
-            CHAPTERS · 章节目录
-          </div>
+        <h2>{L.toc}</h2>
+        <p className="page-note">{L.originalNote}</p>
+        <div className="card-flat" style={{ overflow: 'hidden' }}>
           {book.chapters.map((chapter, i) => (
-            <Link
-              key={i}
-              href={`/library/${book.slug}/${i}`}
-              style={{
-                display: 'flex',
-                alignItems: 'baseline',
-                gap: '14px',
-                padding: '14px 20px',
-                borderBottom: i === book.chapters.length - 1 ? 'none' : '1px dashed rgba(184,146,42,0.15)',
-                textDecoration: 'none',
-                color: 'inherit',
-                transition: 'background 0.15s',
-              }}
-              className="hover:bg-amber-50"
-            >
-              <div style={{ fontSize: '12px', color: 'var(--ac)', fontWeight: 600, minWidth: '40px', letterSpacing: '0.1em' }}>
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '15px', color: 'var(--tx-0)', fontWeight: 500, letterSpacing: '0.08em', marginBottom: '2px' }}>
-                  {chapter.title}
-                </div>
-                {chapter.subtitle && (
-                  <div style={{ fontSize: '11px', color: 'var(--tx-3)' }}>
-                    {chapter.subtitle}
-                  </div>
-                )}
-              </div>
-              <div style={{ fontSize: '10px', color: 'var(--tx-3)', letterSpacing: '0.1em' }}>
-                {chapter.paragraphs.length} 段
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--ac)' }}>→</div>
+            <Link key={i} href={`/library/${book.slug}/${i}`}
+              style={{ display: 'flex', alignItems: 'baseline', gap: '14px', padding: '12px 18px', textDecoration: 'none', color: 'inherit',
+                borderBottom: i === book.chapters.length - 1 ? 'none' : '1px dashed var(--bdr-med)' }}>
+              <span style={{ fontSize: '12px', color: 'var(--ac)', fontWeight: 600, minWidth: '28px' }}>{String(i + 1).padStart(2, '0')}</span>
+              <span lang="zh" style={{ flex: 1 }}>
+                <span style={{ display: 'block', fontSize: '15px', color: 'var(--tx-0)' }}>{chapter.title}</span>
+                {chapter.subtitle && <span style={{ display: 'block', fontSize: '12px', color: 'var(--tx-3)' }}>{chapter.subtitle}</span>}
+              </span>
+              <span className="page-note">{L.paragraphs(chapter.paragraphs.length)}</span>
             </Link>
           ))}
         </div>
-      </div>
+      </main>
     </div>
   );
 }

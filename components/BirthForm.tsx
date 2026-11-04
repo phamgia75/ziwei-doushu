@@ -2,10 +2,13 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { BirthInfo } from '@/lib/ziwei/types';
-import { SHICHEN } from '@/lib/ziwei/constants';
+import type { LateZishiRule } from '@/lib/ziwei/true-solar-time';
 import { useTheme } from '@/components/ThemeProvider';
-import { PROVINCES } from '@/lib/ziwei/cities';
+import { VN_PROVINCES, findVnCity } from '@/lib/geo/vn-places';
+import { vnUtcOffsetMinutes, formatUtcOffset } from '@/lib/geo/vn-time';
 import { formToBirthInfo, calcTrueSolarBranch } from '@/lib/ziwei/share';
+import { BRANCHES_VI, common } from '@/lib/i18n';
+import { birthForm as t } from '@/lib/i18n/vi/birthForm';
 
 export interface BirthFormState {
   name: string;
@@ -28,20 +31,25 @@ interface BirthFormProps {
   loading?: boolean;
   initialData?: Partial<BirthFormState>;
   onFormSave?: (data: BirthFormState) => void;
-  /** 隐藏内部「立即起盘」按钮（合盘等场景由父级统一触发） */
+  /** Hide the internal submit button (e.g. /heming submits both forms from the parent). */
   hideSubmit?: boolean;
+  /** Late Giờ Tý (23:00–23:59) day rule; default = formToBirthInfo's default ('next-day'). */
+  lateZishi?: LateZishiRule;
 }
 
-const SHICHEN_NAMES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+const OTHER = t.place.otherValue;
+const VN_DEFAULT_OFFSET = 420;
+const pad2 = (n: number) => String(n).padStart(2, '0');
+const clockBranch = (h: number) => (h === 23 ? 0 : Math.floor((h + 1) / 2));
+const branchRange = (b: number) => `${pad2((b * 2 + 23) % 24)}:00–${pad2((b * 2 + 1) % 24)}:00`;
 
-/** 检查日期是否合法 */
 function isValidDate(y: number, m: number, d: number): boolean {
   if (!y || !m || !d) return false;
   const date = new Date(y, m - 1, d);
   return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
-export default function BirthForm({ onSubmit, loading, initialData, onFormSave, hideSubmit }: BirthFormProps) {
+export default function BirthForm({ onSubmit, loading, initialData, onFormSave, hideSubmit, lateZishi }: BirthFormProps) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -56,136 +64,179 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
     province: initialData?.province ?? '',
     city: initialData?.city ?? '',
     longitude: initialData?.longitude ?? 120,
+    utcOffsetMinutes: initialData?.utcOffsetMinutes,
     gender: initialData?.gender ?? 'male',
   });
+  const restoredOther = initialData?.province === OTHER;
+  const [customLon, setCustomLon] = useState(restoredOther && initialData?.longitude !== undefined ? String(initialData.longitude) : '');
+  const [customTz, setCustomTz] = useState(
+    restoredOther && initialData?.utcOffsetMinutes !== undefined ? String(initialData.utcOffsetMinutes / 60) : '7',
+  );
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
-  // 表单状态变化时实时同步给父级（合盘等场景下父级靠这个收集双方数据）
-  useEffect(() => {
-    onFormSave?.({ ...form });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
-
-  const cityList = useMemo(() => {
-    const prov = PROVINCES.find(p => p.name === form.province);
-    return prov ? prov.cities : [];
-  }, [form.province]);
-
-  const branch = useMemo(() => {
-    if (form.unknownTime) return 0;
-    return calcTrueSolarBranch(
-      parseInt(form.clockHour) || 0,
-      parseInt(form.clockMinute) || 0,
-      form.longitude,
-    );
-  }, [form.clockHour, form.clockMinute, form.longitude, form.unknownTime]);
-
-  const offsetMin = Math.round((form.longitude - 120) * 4);
-  const shichenInfo = SHICHEN[branch];
-
-  // ─── 校验逻辑 ───────────────────────────────────────────
   const y = parseInt(form.year) || 0;
   const m = parseInt(form.month) || 0;
   const d = parseInt(form.day) || 0;
+  const hh = parseInt(form.clockHour) || 0;
+  const mm = parseInt(form.clockMinute) || 0;
+  const dateValid = isValidDate(y, m, d);
 
+  const isOther = form.province === OTHER;
+  const vnPlace = isOther ? undefined : findVnCity(form.province, form.city);
+  const lonNum = parseFloat(customLon);
+  const tzNum = parseFloat(customTz);
+  const lonValid = Number.isFinite(lonNum) && lonNum >= -180 && lonNum <= 180;
+  const tzValid = Number.isFinite(tzNum) && tzNum >= -12 && tzNum <= 14 && Number.isInteger(tzNum * 2);
+
+  // The state actually submitted: longitude + historical offset resolved from the chosen place.
+  const eff = useMemo<BirthFormState>(() => {
+    if (isOther) {
+      const off = tzValid ? tzNum * 60 : VN_DEFAULT_OFFSET;
+      return { ...form, city: '', longitude: lonValid ? lonNum : off / 4, utcOffsetMinutes: off };
+    }
+    if (vnPlace) {
+      const off = dateValid
+        ? vnUtcOffsetMinutes(vnPlace.lat, y, m, d, form.unknownTime ? 12 : hh, form.unknownTime ? 0 : mm)
+        : VN_DEFAULT_OFFSET;
+      return { ...form, city: vnPlace.name, longitude: vnPlace.longitude, utcOffsetMinutes: off };
+    }
+    // No place: longitude = meridian, so no longitude correction (true solar = clock time).
+    if (!form.province) return { ...form, longitude: VN_DEFAULT_OFFSET / 4, utcOffsetMinutes: VN_DEFAULT_OFFSET };
+    return form; // legacy saved data (e.g. an upstream city): keep its longitude/offset as stored
+  }, [form, isOther, vnPlace, tzValid, tzNum, lonValid, lonNum, dateValid, y, m, d, hh, mm]);
+
+  // Sync live state to the parent (/heming collects both forms this way).
+  useEffect(() => {
+    onFormSave?.({ ...eff });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eff]);
+
+  const cityList = VN_PROVINCES.find(p => p.name === form.province)?.cities ?? [];
+  const offsetUsed = eff.utcOffsetMinutes ?? 480;
+  const branch = form.unknownTime ? 0 : calcTrueSolarBranch(hh, mm, eff.longitude, offsetUsed);
+  const offsetMin = Math.round((eff.longitude - offsetUsed / 4) * 4);
+  const solarMins = ((hh * 60 + mm + (eff.longitude - offsetUsed / 4) * 4) % 1440 + 1440) % 1440;
+  const solarClock = `${pad2(Math.floor(Math.round(solarMins) / 60) % 24)}:${pad2(Math.round(solarMins) % 60)}`;
+
+  const chartInfo = useMemo(() => (dateValid ? formToBirthInfo(eff, { lateZishi }) : null), [eff, lateZishi, dateValid]);
+  const ziHint = (() => {
+    if (form.unknownTime || !chartInfo || branch !== 0) return null;
+    const late = solarMins >= 1380;
+    const chartKey = chartInfo.year * 10000 + chartInfo.month * 100 + chartInfo.day;
+    const inputKey = y * 10000 + m * 100 + d;
+    const tag = chartKey > inputKey ? t.zi.nextDay : chartKey === inputKey ? t.zi.sameDay : '';
+    return `${t.zi.explain} ${late ? t.zi.late : t.zi.early} ${t.zi.chartDay} ${chartInfo.day}/${chartInfo.month}/${chartInfo.year} ${tag}`.trim();
+  })();
+
+  const tzNote = (() => {
+    if (!vnPlace || offsetUsed === VN_DEFAULT_OFFSET) return null;
+    const why = offsetUsed === 480 && vnPlace.lat < 17 && y >= 1960 && y <= 1975 ? t.place.southRvn : t.place.historical;
+    return `${t.place.tzAtBirth}: ${formatUtcOffset(offsetUsed)} (${why})`;
+  })();
+
+  // ─── Validation ─────────────────────────────────────────
   const errors = {
-    year: !form.year ? '请选择出生年份'
-      : y < 1900 || y > 2026 ? '年份范围：1900–2026'
+    year: !form.year ? t.errors.yearRequired
+      : y < 1900 || y > 2026 ? t.errors.yearRange
       : '',
-    month: !form.month ? '请选择月份' : '',
-    day: !form.day ? '请选择日期'
-      : form.year && form.month && !isValidDate(y, m, d) ? `${m}月没有${d}日`
+    month: !form.month ? t.errors.monthRequired : '',
+    day: !form.day ? t.errors.dayRequired
+      : form.year && form.month && !dateValid ? t.errors.dayInvalid(m, d)
       : '',
+    lon: isOther && !lonValid ? t.errors.longitude : '',
+    tz: isOther && !tzValid ? t.errors.utcOffset : '',
   };
   const hasError = Object.values(errors).some(Boolean);
 
-  // ─── 完成度（用于进度条） ────────────────────────────────
+  // ─── Progress ───────────────────────────────────────────
   const steps = [
     !!form.year && !!form.month && !!form.day && !errors.year && !errors.month && !errors.day,
-    !!form.province && !!form.city,
+    isOther ? !errors.lon && !errors.tz : !!vnPlace,
     form.unknownTime || (!!form.clockHour && !!form.clockMinute),
-    true, // 性别有默认值
+    true, // gender has a default
   ];
   const completedSteps = steps.filter(Boolean).length;
 
-  // ─── Summary chip：全部必填完成后显示 ───────────────────
   const showSummary = steps[0] && steps[2] && !hasError;
   const summaryText = showSummary
     ? [
-        `${y}年${m}月${d}日`,
-        form.city || (form.province ? form.province : ''),
-        form.unknownTime ? '时辰不详' : `${SHICHEN_NAMES[branch]}时`,
-        form.gender === 'male' ? '男' : '女',
+        `${d}/${m}/${y}`,
+        isOther ? OTHER : eff.city || form.province,
+        form.unknownTime ? t.time.unknownShort : `${t.time.branchPrefix} ${BRANCHES_VI[branch]}`,
+        common.gender[form.gender],
       ].filter(Boolean).join(' · ')
     : '';
 
   const handleProvince = (prov: string) => {
-    const provData = PROVINCES.find(p => p.name === prov);
-    const firstCity = provData?.cities[0];
-    setForm({ ...form, province: prov, city: firstCity?.name || '', longitude: firstCity?.longitude ?? 120 });
-  };
-
-  const handleCity = (cityName: string) => {
-    const prov = PROVINCES.find(p => p.name === form.province);
-    const cityData = prov?.cities.find(c => c.name === cityName);
-    setForm({ ...form, city: cityName, longitude: cityData?.longitude ?? 120 });
+    const first = VN_PROVINCES.find(p => p.name === prov)?.cities[0];
+    setForm({ ...form, province: prov, city: first?.name ?? '' });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitAttempted(true);
-    setTouched({ year: true, month: true, day: true });
+    setTouched({ year: true, month: true, day: true, lon: true, tz: true });
     if (hasError) return;
-    onFormSave?.({ ...form });
-    // 统一走 lib/ziwei/share.ts 的转换：它负责晚子时换日（23:00–23:59 按次日排盘）。
-    // 在这里手拼 BirthInfo 会绕过这条规则，使 /chart 与 /heming 对同一份输入排出相差一天的盘。
-    onSubmit(formToBirthInfo(form));
+    onFormSave?.({ ...eff });
+    // Always go through formToBirthInfo: it owns the late-Giờ-Tý day rollover; a hand-built BirthInfo would bypass it.
+    onSubmit(formToBirthInfo(eff, { lateZishi }));
   };
 
-  // ─── 样式变量 ────────────────────────────────────────────
+  // ─── Style tokens ───────────────────────────────────────
   const bg = isDark ? 'rgba(8,16,40,0.85)' : 'rgba(255,255,255,0.92)';
   const border = isDark ? 'rgba(255,255,255,0.12)' : 'rgba(200,160,60,0.2)';
-  // 暗色模式标签提亮：从 rgba(74,112,144,1) → rgba(180,200,225,0.9)
-  const labelClr = isDark ? 'rgba(180,200,225,0.9)' : 'rgba(120,80,10,0.55)';
+  const labelClr = isDark ? 'rgba(180,200,225,0.9)' : 'rgba(120,80,10,0.7)';
   const inputBg = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(255,252,240,0.8)';
   const inputBorder = isDark ? 'rgba(255,255,255,0.18)' : 'rgba(200,160,60,0.25)';
-  // 输入文字提亮：从 #c8d8f0 → #e8eef8
   const inputClr = isDark ? '#e8eef8' : '#2a1a00';
   const focusBorder = isDark ? 'rgba(212,168,67,0.5)' : 'rgba(180,120,20,0.5)';
   const errorClr = isDark ? '#f87171' : '#dc2626';
   const panelBg = isDark ? 'rgba(255,255,255,0.03)' : 'rgba(255,250,235,0.7)';
   const panelBorder = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(200,160,60,0.2)';
   const goldText = isDark ? '#d4a843' : '#7a5008';
+  const hintClr = isDark ? 'rgba(180,210,235,0.85)' : 'rgba(100,70,10,0.7)';
   const summaryBg = isDark ? 'rgba(37,99,235,0.12)' : 'rgba(37,99,235,0.07)';
   const summaryBorder = isDark ? 'rgba(37,99,235,0.35)' : 'rgba(37,99,235,0.25)';
   const summaryClr = isDark ? 'rgba(147,197,253,0.9)' : 'rgba(37,99,235,0.85)';
 
+  // 16px font: iOS Safari zooms into inputs below that. 44px min height: tap target.
   const inputStyle = {
     background: inputBg,
     border: `1px solid ${inputBorder}`,
     color: inputClr,
     borderRadius: '14px',
-    padding: '10px 14px',
-    fontSize: '13px',
+    padding: '10px 12px',
+    fontSize: '16px',
+    minHeight: '44px',
     width: '100%',
+    minWidth: 0,
+    boxSizing: 'border-box',
     outline: 'none',
     transition: 'border-color 0.2s',
   } as React.CSSProperties;
 
   const errorInputStyle = { ...inputStyle, borderColor: errorClr };
+  const labelStyle: React.CSSProperties = { display: 'block', fontSize: '13px', color: labelClr, marginBottom: '6px', letterSpacing: '0.02em' };
+  const captionStyle: React.CSSProperties = { display: 'block', fontSize: '12px', color: labelClr, marginBottom: '3px' };
+  const hintStyle: React.CSSProperties = { fontSize: '12px', lineHeight: 1.45, color: hintClr, marginTop: '6px' };
+  const focusHandlers = {
+    onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.target.style.borderColor = focusBorder; },
+    onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.target.style.borderColor = inputBorder; },
+  };
 
   function FieldError({ msg }: { msg: string }) {
     return (
       <AnimatePresence>
         {msg && (
           <motion.p
+            role="alert"
             initial={{ opacity: 0, y: -4, height: 0 }}
             animate={{ opacity: 1, y: 0, height: 'auto' }}
             exit={{ opacity: 0, y: -4, height: 0 }}
             transition={{ duration: 0.18 }}
-            style={{ color: errorClr, fontSize: '11px', marginTop: '4px' }}
+            style={{ color: errorClr, fontSize: '12px', marginTop: '4px' }}
           >
             ✕ {msg}
           </motion.p>
@@ -202,15 +253,14 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      style={{ background: bg, border: `1px solid ${border}`, borderRadius: '24px', padding: '28px', backdropFilter: 'blur(20px)' }}
+      style={{ background: bg, border: `1px solid ${border}`, borderRadius: '24px', padding: 'clamp(16px, 5vw, 28px)', backdropFilter: 'blur(20px)', maxWidth: '100%', boxSizing: 'border-box' }}
     >
-      {/* 标题 */}
-      <h3 style={{ color: goldText, fontSize: '12px', letterSpacing: '0.4em', textAlign: 'center', marginBottom: '20px', fontWeight: 500 }}>
-        ── 输入生辰八字 ──
+      <h3 style={{ color: goldText, fontSize: '14px', letterSpacing: '0.15em', textAlign: 'center', marginBottom: '20px', fontWeight: 500 }}>
+        ── {t.title} ──
       </h3>
 
-      {/* ── 进度条 ── */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '20px' }}>
+      {/* Progress */}
+      <div style={{ display: 'flex', gap: '4px', marginBottom: '20px' }} aria-label={`${completedSteps}/${steps.length}`}>
         {steps.map((done, i) => (
           <motion.div
             key={i}
@@ -221,209 +271,238 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
         ))}
       </div>
 
-      {/* ── 姓名 ── */}
+      {/* Name */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>姓名（可选）</label>
+        <label htmlFor="bf-name" style={labelStyle}>{t.name.label}</label>
         <input
+          id="bf-name"
           type="text"
-          placeholder="请输入姓名"
+          placeholder={t.name.placeholder}
           value={form.name}
           onChange={e => setForm({ ...form, name: e.target.value })}
           style={inputStyle}
-          onFocus={e => { e.target.style.borderColor = focusBorder; }}
-          onBlur={e => { e.target.style.borderColor = inputBorder; }}
+          {...focusHandlers}
         />
       </div>
 
-      {/* ── 出生日期 ── */}
+      {/* Date of birth: Vietnamese order day / month / year */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>出生日期（公历）</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-          <div>
+        <span style={labelStyle}>{t.date.label}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1.3fr', gap: '8px' }}>
+          <div style={{ minWidth: 0 }}>
+            <label htmlFor="bf-day" style={captionStyle}>{t.date.day}</label>
             <select
+              id="bf-day"
+              value={form.day}
+              onChange={e => { setForm({ ...form, day: e.target.value }); setTouched(x => ({ ...x, day: true })); }}
+              style={showErr('day') && errors.day ? errorInputStyle : inputStyle}
+              required
+            >
+              <option value="">–</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map(dy => (
+                <option key={dy} value={String(dy)}>{dy}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <label htmlFor="bf-month" style={captionStyle}>{t.date.month}</label>
+            <select
+              id="bf-month"
+              value={form.month}
+              onChange={e => { setForm({ ...form, month: e.target.value }); setTouched(x => ({ ...x, month: true })); }}
+              style={showErr('month') && errors.month ? errorInputStyle : inputStyle}
+              required
+            >
+              <option value="">–</option>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map(mo => (
+                <option key={mo} value={String(mo)}>{mo}</option>
+              ))}
+            </select>
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <label htmlFor="bf-year" style={captionStyle}>{t.date.year}</label>
+            <select
+              id="bf-year"
               value={form.year}
-              onChange={e => { setForm({ ...form, year: e.target.value }); setTouched(t => ({ ...t, year: true })); }}
+              onChange={e => { setForm({ ...form, year: e.target.value }); setTouched(x => ({ ...x, year: true })); }}
               style={showErr('year') && errors.year ? errorInputStyle : inputStyle}
               required
             >
-              <option value="">年份</option>
+              <option value="">–</option>
               {Array.from({ length: 127 }, (_, i) => 2026 - i).map(yr => (
                 <option key={yr} value={String(yr)}>{yr}</option>
               ))}
             </select>
-            <FieldError msg={showErr('year') ? errors.year : ''} />
-          </div>
-          <div>
-            <select
-              value={form.month}
-              onChange={e => { setForm({ ...form, month: e.target.value }); setTouched(t => ({ ...t, month: true })); }}
-              style={showErr('month') && errors.month ? errorInputStyle : inputStyle}
-              required
-            >
-              <option value="">月份</option>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map(mo => (
-                <option key={mo} value={String(mo)}>{mo} 月</option>
-              ))}
-            </select>
-            <FieldError msg={showErr('month') ? errors.month : ''} />
-          </div>
-          <div>
-            <select
-              value={form.day}
-              onChange={e => { setForm({ ...form, day: e.target.value }); setTouched(t => ({ ...t, day: true })); }}
-              style={showErr('day') && errors.day ? errorInputStyle : inputStyle}
-              required
-            >
-              <option value="">日期</option>
-              {Array.from({ length: 31 }, (_, i) => i + 1).map(dy => (
-                <option key={dy} value={String(dy)}>{dy} 日</option>
-              ))}
-            </select>
-            <FieldError msg={showErr('day') ? errors.day : ''} />
           </div>
         </div>
+        <FieldError msg={showErr('day') ? errors.day : ''} />
+        <FieldError msg={showErr('month') ? errors.month : ''} />
+        <FieldError msg={showErr('year') ? errors.year : ''} />
       </div>
 
-      {/* ── 出生地点 ── */}
+      {/* Birthplace */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>出生地点（用于真太阳时校正）</label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+        <span style={labelStyle}>{t.place.label}</span>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
           <select
+            aria-label={t.place.province}
             value={form.province}
             onChange={e => handleProvince(e.target.value)}
             style={inputStyle}
-            onFocus={e => { e.target.style.borderColor = focusBorder; }}
-            onBlur={e => { e.target.style.borderColor = inputBorder; }}
+            {...focusHandlers}
           >
-            <option value="">省份 / 直辖市</option>
-            {PROVINCES.map(p => (
+            <option value="">{t.place.province}</option>
+            {VN_PROVINCES.map(p => (
               <option key={p.name} value={p.name}>{p.name}</option>
             ))}
+            <option value={OTHER}>{t.place.otherOption}</option>
           </select>
-          <select
-            value={form.city}
-            onChange={e => handleCity(e.target.value)}
-            disabled={!form.province}
-            style={{ ...inputStyle, opacity: form.province ? 1 : 0.45 }}
-            onFocus={e => { e.target.style.borderColor = focusBorder; }}
-            onBlur={e => { e.target.style.borderColor = inputBorder; }}
-          >
-            <option value="">{form.province ? '城市' : '先选省份'}</option>
-            {cityList.map(c => (
-              <option key={c.name} value={c.name}>{c.name}</option>
-            ))}
-          </select>
-        </div>
-        <AnimatePresence mode="wait">
-          {form.province ? (
-            <motion.p
-              key="location-info"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{ fontSize: '10px', color: isDark ? 'rgba(180,210,235,0.85)' : 'rgba(100,70,10,0.5)', marginTop: '5px' }}
+          {!isOther && (
+            <select
+              aria-label={t.place.city}
+              value={vnPlace?.name ?? ''}
+              onChange={e => setForm({ ...form, city: e.target.value })}
+              disabled={!vnPlace}
+              style={{ ...inputStyle, opacity: vnPlace ? 1 : 0.45 }}
+              {...focusHandlers}
             >
-              {form.city || '（请选择城市）'} · 经度 {form.longitude.toFixed(1)}°E · 时差 {offsetMin > 0 ? '+' : ''}{offsetMin} 分钟
-            </motion.p>
-          ) : (
-            <motion.p
-              key="location-hint"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              style={{ fontSize: '10px', color: isDark ? 'rgba(165,185,210,0.7)' : 'rgba(140,100,20,0.45)', marginTop: '5px' }}
-            >
-              * 倪海厦批命用真太阳时，建议填写出生地以自动校正时辰
-            </motion.p>
+              {!vnPlace && <option value="">{t.place.pickProvinceFirst}</option>}
+              {cityList.map(c => (
+                <option key={c.name} value={c.name}>{c.name}</option>
+              ))}
+            </select>
           )}
-        </AnimatePresence>
+        </div>
+        {isOther && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px', marginTop: '8px' }}>
+            <div style={{ minWidth: 0 }}>
+              <label htmlFor="bf-lon" style={captionStyle}>{t.place.longitude}</label>
+              <input
+                id="bf-lon"
+                type="number"
+                inputMode="decimal"
+                min={-180}
+                max={180}
+                step={0.01}
+                value={customLon}
+                onChange={e => { setCustomLon(e.target.value); setTouched(x => ({ ...x, lon: true })); }}
+                style={showErr('lon') && errors.lon ? errorInputStyle : inputStyle}
+                {...focusHandlers}
+              />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <label htmlFor="bf-tz" style={captionStyle}>{t.place.utcOffset}</label>
+              <input
+                id="bf-tz"
+                type="number"
+                inputMode="decimal"
+                min={-12}
+                max={14}
+                step={0.5}
+                value={customTz}
+                onChange={e => { setCustomTz(e.target.value); setTouched(x => ({ ...x, tz: true })); }}
+                style={showErr('tz') && errors.tz ? errorInputStyle : inputStyle}
+                {...focusHandlers}
+              />
+            </div>
+          </div>
+        )}
+        <FieldError msg={showErr('lon') ? errors.lon : ''} />
+        <FieldError msg={showErr('tz') ? errors.tz : ''} />
+        {form.province ? (
+          <p style={hintStyle}>
+            {isOther ? OTHER : eff.city || form.province} · {eff.longitude.toFixed(2)}° · {formatUtcOffset(offsetUsed)} · {t.place.correction} {offsetMin > 0 ? '+' : ''}{offsetMin} {t.place.minutes}
+            {tzNote && <><br /><strong>{tzNote}</strong></>}
+          </p>
+        ) : (
+          <p style={hintStyle}>* {t.place.noPlaceHint}</p>
+        )}
       </div>
 
-      {/* ── 出生时间 ── */}
+      {/* Birth time */}
       <div style={{ marginBottom: '16px' }}>
-        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>出生时间（北京时间）</label>
+        <span style={labelStyle}>{t.time.label}</span>
         <div style={{ borderRadius: '14px', padding: '12px', background: panelBg, border: `1px solid ${panelBorder}`, opacity: form.unknownTime ? 0.45 : 1, pointerEvents: form.unknownTime ? 'none' : 'auto', transition: 'opacity 0.2s' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px', marginBottom: '8px' }}>
             <select
+              aria-label={t.time.hour}
               value={form.clockHour}
               onChange={e => setForm({ ...form, clockHour: e.target.value })}
               style={inputStyle}
             >
               {Array.from({ length: 24 }, (_, i) => i).map(h => (
-                <option key={h} value={String(h)}>{h.toString().padStart(2, '0')} 时</option>
+                <option key={h} value={String(h)}>
+                  {pad2(h)} {t.time.hour} · {BRANCHES_VI[clockBranch(h)]} ({branchRange(clockBranch(h))})
+                </option>
               ))}
             </select>
             <select
+              aria-label={t.time.minute}
               value={form.clockMinute}
               onChange={e => setForm({ ...form, clockMinute: e.target.value })}
               style={inputStyle}
             >
               {Array.from({ length: 60 }, (_, i) => i).map(min => (
-                <option key={min} value={String(min)}>{min.toString().padStart(2, '0')} 分</option>
+                <option key={min} value={String(min)}>{pad2(min)} {t.time.minute}</option>
               ))}
             </select>
           </div>
-          {/* 真太阳时结果 */}
           <div style={{ textAlign: 'center', padding: '4px 0' }}>
-            <span style={{ fontSize: '10px', color: isDark ? 'rgba(170,195,220,0.75)' : 'rgba(140,100,20,0.5)' }}>真太阳时 → </span>
-            <span style={{ fontSize: '15px', color: goldText, fontWeight: 600, letterSpacing: '0.08em' }}>
-              {SHICHEN_NAMES[branch]}时
+            <span style={{ fontSize: '12px', color: hintClr }}>{t.time.trueSolar} ≈ {solarClock} → </span>
+            <span style={{ fontSize: '16px', color: goldText, fontWeight: 600 }}>
+              {t.time.branchPrefix} {BRANCHES_VI[branch]}
             </span>
-            {shichenInfo && (
-              <span style={{ fontSize: '10px', color: isDark ? 'rgba(170,195,220,0.75)' : 'rgba(140,100,20,0.5)', marginLeft: '4px' }}>
-                （{shichenInfo.range}）
-              </span>
-            )}
+            <span style={{ fontSize: '12px', color: hintClr, marginLeft: '4px' }}>({branchRange(branch)})</span>
           </div>
+          {ziHint && <p style={{ ...hintStyle, marginTop: '4px' }}>{ziHint}</p>}
         </div>
-        <label style={{ display: 'flex', alignItems: 'center', gap: '7px', marginTop: '8px', cursor: 'pointer' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '4px', minHeight: '44px', cursor: 'pointer' }}>
           <input
             type="checkbox"
             checked={form.unknownTime}
             onChange={e => setForm({ ...form, unknownTime: e.target.checked })}
-            style={{ width: '14px', height: '14px', borderRadius: '4px', cursor: 'pointer' }}
+            style={{ width: '20px', height: '20px', flexShrink: 0, cursor: 'pointer' }}
           />
-          <span style={{ fontSize: '10px', color: isDark ? 'rgba(165,185,210,0.7)' : 'rgba(140,100,20,0.45)' }}>
-            不知道出生时间，以子时（23:00–01:00）起盘
-          </span>
+          <span style={{ fontSize: '13px', color: hintClr }}>{t.time.unknown}</span>
         </label>
       </div>
 
-      {/* ── 性别 ── */}
+      {/* Gender */}
       <div style={{ marginBottom: '20px' }}>
-        <label style={{ display: 'block', fontSize: '11px', color: labelClr, marginBottom: '6px', letterSpacing: '0.05em' }}>性别</label>
+        <span style={labelStyle}>{t.gender}</span>
         <div style={{ display: 'flex', gap: '10px' }}>
           {(['male', 'female'] as const).map(g => {
             const active = form.gender === g;
-            const isMale = g === 'male';
-            const accent = isMale ? '37,99,235' : '225,29,72';
+            const accent = g === 'male' ? '37,99,235' : '225,29,72';
             return (
               <motion.button
                 key={g}
                 type="button"
+                aria-pressed={active}
                 onClick={() => setForm({ ...form, gender: g })}
                 whileTap={{ scale: 0.97 }}
                 style={{
                   flex: 1,
+                  minHeight: '44px',
                   padding: '11px',
                   borderRadius: '14px',
-                  fontSize: '13px',
+                  fontSize: '16px',
                   fontWeight: 500,
                   border: `1px solid ${active ? `rgba(${accent},0.6)` : inputBorder}`,
                   background: active ? `rgba(${accent},0.08)` : inputBg,
-                  color: active ? `rgba(${accent},0.9)` : (isDark ? 'rgba(190,205,225,0.7)' : 'rgba(100,80,40,0.4)'),
+                  color: active ? `rgba(${accent},0.9)` : (isDark ? 'rgba(190,205,225,0.7)' : 'rgba(100,80,40,0.6)'),
                   transition: 'all 0.2s',
                   cursor: 'pointer',
                 }}
               >
-                {isMale ? '♂ 男' : '♀ 女'}
+                {g === 'male' ? '♂' : '♀'} {common.gender[g]}
               </motion.button>
             );
           })}
         </div>
       </div>
 
-      {/* ── 确认信息 Summary Chip ── */}
+      {/* Summary chip */}
       <AnimatePresence>
         {showSummary && (
           <motion.div
@@ -441,8 +520,8 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
               alignItems: 'center',
               gap: '8px',
             }}>
-              <span style={{ fontSize: '12px', color: summaryClr }}>✓</span>
-              <span style={{ fontSize: '11px', color: summaryClr, letterSpacing: '0.03em', flex: 1 }}>
+              <span style={{ fontSize: '13px', color: summaryClr }}>✓</span>
+              <span style={{ fontSize: '13px', color: summaryClr, flex: 1, overflowWrap: 'anywhere' }}>
                 {summaryText}
               </span>
             </div>
@@ -450,7 +529,7 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
         )}
       </AnimatePresence>
 
-      {/* ── 提交按钮 ── */}
+      {/* Submit */}
       {!hideSubmit && <motion.button
         type="submit"
         disabled={loading}
@@ -458,11 +537,12 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
         whileTap={loading ? {} : { scale: 0.98 }}
         style={{
           width: '100%',
+          minHeight: '48px',
           padding: '14px',
           borderRadius: '16px',
-          fontSize: '13px',
+          fontSize: '16px',
           fontWeight: 600,
-          letterSpacing: '0.15em',
+          letterSpacing: '0.05em',
           border: 'none',
           cursor: loading ? 'not-allowed' : 'pointer',
           background: loading
@@ -482,9 +562,9 @@ export default function BirthForm({ onSubmit, loading, initialData, onFormSave, 
               transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
               style={{ display: 'inline-block', width: '12px', height: '12px', border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%' }}
             />
-            紫微起盘中…
+            {t.submitting}
           </span>
-        ) : '立即起盘 · 解命运密码'}
+        ) : t.submit}
       </motion.button>}
     </motion.form>
   );

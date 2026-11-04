@@ -2,10 +2,10 @@ import type { BirthFormState } from '@/components/BirthForm';
 import type { BirthInfo } from './types';
 import { branchFromSolarMinutes, resolveZiweiDayOffset, shiftGregorianDate, type LateZishiRule } from './true-solar-time';
 
-/** 根据北京时间 + 经度计算真太阳时时辰支 (0-11) */
-export function calcTrueSolarBranch(clockHour: number, clockMinute: number, longitude: number): number {
+/** 根据钟表时间 + 经度计算真太阳时时辰支 (0-11)；utcOffsetMinutes 默认 480 = 北京时间 */
+export function calcTrueSolarBranch(clockHour: number, clockMinute: number, longitude: number, utcOffsetMinutes = 480): number {
   const clockMins = clockHour * 60 + clockMinute;
-  const offset = (longitude - 120) * 4;
+  const offset = (longitude - utcOffsetMinutes / 4) * 4;
   const solar = ((clockMins + offset) % 1440 + 1440) % 1440;
   if (solar >= 1380 || solar < 60) return 0;
   return Math.floor((solar - 60) / 120) + 1;
@@ -65,6 +65,7 @@ export function formToSearchParams(form: BirthFormState): URLSearchParams {
   if (form.province) p.set('p', form.province);
   if (form.city) p.set('c', form.city);
   if (form.longitude && form.longitude !== 120) p.set('lo', String(form.longitude));
+  if (form.utcOffsetMinutes !== undefined) p.set('tz', String(form.utcOffsetMinutes));
   p.set('g', form.gender === 'male' ? 'm' : 'f');
   return p;
 }
@@ -87,5 +88,6 @@ export function searchParamsToForm(params: URLSearchParams): Partial<BirthFormSt
     city: params.get('c') || '',
     longitude: parseFloat(params.get('lo') || '120'),
     gender: params.get('g') === 'f' ? 'female' : 'male',
+    ...(params.get('tz') !== null && Number.isFinite(parseFloat(params.get('tz')!)) ? { utcOffsetMinutes: parseFloat(params.get('tz')!) } : {}),
   };
 }
