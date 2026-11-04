@@ -22,3 +22,14 @@
 
 Open items: see KNOWN-LIMITATIONS.md. Not done (needs authorization): pushing branch `tuvi-vi` to the fork.
 Review: OCR Level 1 (5 findings, 4 fixed, 1 recorded) + Codex Level 2 (4 findings, all fixed; re-review PASS).
+
+## Post-MVP hardening (2026-11-05) — commercial production release NOT approved
+| Package | State | Evidence |
+|---|---|---|
+| P0 AI fact verification | done | claims verifier + facts/interpretation split + adversarial tests; live runs catch real model errors |
+| P1 VN calendar & time | done | 13,306 boundary checks, 63 reproducible golden fixtures, historical calendar rule, CN-fallback surfaced |
+| P1 interpretation quality | done | terminology dictionary (296 terms, 25 variant groups), checkers, QA set 93 % automated pass |
+| P1 performance | done | profile + prompt/cache/retrieval changes; see TEST-RESULTS.md (fresh 18–32 s, repeats ~0 s) |
+| P2 PDF export | done | native in-browser PDF with chart, parameters, conventions, provenance |
+| Review | done | OCR + Codex (3 rounds, cap reached); 6 Codex findings fixed |
+| GitHub | branch `tuvi-vi` pushed to fork phamgia75/ziwei-doushu (no merge, no release, no deploy) |

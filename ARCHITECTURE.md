@@ -36,3 +36,11 @@ Local server (Next route handlers, 127.0.0.1)
   Record trusted only if its Mệnh main star equals our chart's (237/237 on a 1990 sample).
 - **Chinese sources, Vietnamese answers** — retrieval passes original texts with provenance; the model writes Vietnamese.
 - **VN calendar without engine changes** — chart the solar date whose Chinese lunar date equals the Vietnamese one.
+
+## Hardening additions (post-MVP)
+- **Claim verification** `lib/server/ai/claims.ts` → `validate.ts`: every recognised claim in an answer is recomputed from the chart
+  (✓ verified / ✗ contradicted / ? unverified); answers must open with **Dữ kiện lá số** ([F#] per line) before **Luận giải truyền thống**.
+- **Answer cache** `lib/server/ai/answer-cache.ts`: exact provider+model+messages key, raw text only, re-validated on replay; cleared by `/api/privacy`.
+- **Calendar rule** `lib/calendar/vn-chart.ts` `vnCalendarTz(date, region)`; region from birthplace (`lib/geo/vn-places.ts vnRegion`).
+- **Terminology** `lib/i18n/terminology.ts` (dictionary + variants, used by translation and AI validation); docs/vi/THUAT-NGU.md.
+- **PDF** `lib/client/pdf-report.ts` (in-browser, pdf-lib + Be Vietnam Pro), fed by the chart-scoped `lib/client/report-store.ts`.

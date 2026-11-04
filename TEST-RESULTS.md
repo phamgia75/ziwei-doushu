@@ -1,4 +1,38 @@
-# Test results — 2026-11-05, branch `tuvi-vi`, macOS (Apple Silicon, 64 GB), Node 24.22.0
+# Test results — branch `tuvi-vi`, macOS (Apple Silicon, 64 GB), Node 24.22.0
+
+## Post-MVP hardening run (2026-11-05, final commit after `da07175`)
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | pass |
+| `npm test` | **38/38 test files pass** |
+| E2E vs rebuilt production (desktop + iPhone/iPad WebKit + local AI) | **51/51 pass** (adds native PDF download, verification panel) |
+| `npm run check:i18n` / `check:terms` / `check:secrets` / `npm audit` | 0 / 0 source issues / 0 findings (246 files) / 0 vulnerabilities |
+| Review | OCR (Claude) + 3 independent Codex rounds: 6 findings, all fixed with tests (round cap reached) |
+
+**P0 fact verification** (`tests/unit/ai-claims.test.ts`): placements, brightness, Mệnh/Thân Chủ, Thân cư, palace branch, tam hợp, xung/hội chiếu, giáp,
+Tứ Hóa by scope (natal / Đại Hạn hiện tại / Đại Hạn a–b / năm YYYY / Tự Hóa), Hóa-X-nhập-cung, compatibility per person — fabricated relations flagged ✗,
+undecidable ones ?; real-model regressions included. Live qwen3.5 runs: 17–44 claims verified per answer; genuine model errors caught
+(e.g. wrong Mệnh Chủ, "Tham Lang [Hãm]" vs Miếu, Hóa Lộc placed in the wrong palace, Lưu Niên Tứ Hóa mix-ups).
+
+**P1 calendar/time**: 13,306 boundary checks (8 tz transitions minute-by-minute, Giờ Tý × Tết × EoT × calendars); 63 reproducible VN golden
+fixtures (byte-identical regeneration); historical rule (VN calendar = UTC+8 before 1968 / South until 1975) — only `tz-1968-hue` changed.
+
+**P1 translation QA** (45 paragraphs, automated checks only): 36/45 (80 %) → **42/45 (93 %)** after the leftover-Chinese repair pass.
+
+**P1 performance** (`scripts/perf/bench-ai.ts`, same 4 cases, local qwen3.5:35b):
+
+| Case | before: 1st / repeat | after: fresh / exact repeat |
+|---|---|---|
+| topic career | 47.0 s / 28.3 s | 25.3 s / 0.0 s |
+| overview | 39.3 s / 20.1 s | 31.5 s / 0.0 s |
+| chat | 23.1 s / 22.2 s | 18.0 s / 0.0 s |
+| heming | 42.3 s / 35.2 s | 30.5 s / 0.1 s |
+
+Profile: prompt ≈4.7k tokens (was ≈5.1k), prompt eval 3.7–7.7 s, generation ≈50 tok/s for 730–1,240 output tokens (14–24 s) — generation dominates;
+verification adds milliseconds. Exact repeats are served from the answer cache and re-validated with the current verifier.
+
+## MVP run (2026-11-05)
 
 All results below were produced by actually running the commands on this machine.
 

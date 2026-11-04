@@ -12,6 +12,8 @@
 | next 16.4.3, react 19.3, framer-motion, clsx, tailwindcss, html2canvas, tsx | MIT | runtime/build |
 | pdf-lib 1.17.1, @pdf-lib/fontkit 1.1.1 | MIT | in-browser PDF report |
 | Be Vietnam Pro (Regular, Bold) — `public/fonts/` with `OFL.txt` | SIL OFL 1.1 | embedded (subset) in PDF reports |
+| pako (via pdf-lib) | MIT AND Zlib | PDF compression |
+| sharp / libvips (optional dependency of next) | Apache-2.0 / LGPL-3.0-or-later | installed by npm for Next image optimisation; not used by TuVi AI, not committed or redistributed |
 | typescript, @playwright/test | Apache-2.0 | dev |
 
 Required attribution (shown on the About page and README-VI):
