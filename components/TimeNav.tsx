@@ -1,6 +1,9 @@
 'use client';
 import { motion } from 'framer-motion';
-import { STEMS, SI_HUA_TABLE } from '@/lib/ziwei/constants';
+import { SI_HUA_TABLE } from '@/lib/ziwei/constants';
+import { term, STEMS_VI } from '@/lib/i18n';
+import { chart as t, SIHUA_FULL } from '@/lib/i18n/vi/chart';
+import type { SiHua } from '@/lib/ziwei/types';
 import type { ZiweiChart } from '@/lib/ziwei/types';
 
 export type TimeView = 'mingpan' | 'daxian' | 'liunian';
@@ -13,6 +16,8 @@ interface TimeNavProps {
   onYearChange: (year: number) => void;
 }
 
+const SIHUA_ORDER: SiHua[] = ['禄', '权', '科', '忌']; // i18n-ok: engine SiHua identifiers
+
 /** 由年份计算天干索引 (0-9) */
 export function getYearStemIndex(year: number): number {
   return ((year - 4) % 10 + 10) % 10;
@@ -22,12 +27,7 @@ export function getYearStemIndex(year: number): number {
 export function buildSiHuaOverlay(stemIndex: number): Record<string, string> {
   const stars = SI_HUA_TABLE[stemIndex];
   if (!stars) return {};
-  return {
-    [stars[0]]: '禄',
-    [stars[1]]: '权',
-    [stars[2]]: '科',
-    [stars[3]]: '忌',
-  };
+  return Object.fromEntries(stars.map((name, i) => [name, SIHUA_ORDER[i]]));
 }
 
 const SIHUA_COLORS: Record<string, string> = {
@@ -55,7 +55,7 @@ export default function TimeNav({
       if (!dxPalace) return null;
       const stemIndex = dxPalace.stem;
       return {
-        stemName: STEMS[stemIndex],
+        stemName: STEMS_VI[stemIndex],
         overlay: buildSiHuaOverlay(stemIndex),
       };
     }
@@ -63,7 +63,7 @@ export default function TimeNav({
     if (view === 'liunian') {
       const stemIndex = getYearStemIndex(liunianYear);
       return {
-        stemName: STEMS[stemIndex],
+        stemName: STEMS_VI[stemIndex],
         overlay: buildSiHuaOverlay(stemIndex),
       };
     }
@@ -85,7 +85,7 @@ export default function TimeNav({
           active={view === 'mingpan'}
           onClick={() => onViewChange('mingpan')}
         >
-          本命
+          {t.nav.natal}
         </TabButton>
 
         {/* 大限 */}
@@ -93,7 +93,7 @@ export default function TimeNav({
           active={view === 'daxian'}
           onClick={() => onViewChange('daxian')}
         >
-          {currentDx ? `大限 ${currentDx.startAge}–${currentDx.endAge}` : '大限'}
+          {currentDx ? `${t.nav.daxian} ${currentDx.startAge}–${currentDx.endAge}` : t.nav.daxian}
         </TabButton>
 
         {/* 流年 — 含年份切换 */}
@@ -113,7 +113,7 @@ export default function TimeNav({
             className="text-[10px] font-medium flex-1 text-center"
             style={{ color: view === 'liunian' ? 'var(--t-gold)' : 'var(--t-faint)' }}
           >
-            流年
+            {t.nav.liunian}
           </button>
           {/* 年份 +/- */}
           <div className="flex items-center gap-0.5">
@@ -121,6 +121,7 @@ export default function TimeNav({
               onClick={e => { e.stopPropagation(); onYearChange(liunianYear - 1); if (view !== 'liunian') onViewChange('liunian'); }}
               className="text-[9px] w-4 h-4 flex items-center justify-center rounded"
               style={{ color: 'var(--t-faint)' }}
+              aria-label={t.nav.prevYear}
             >
               ‹
             </button>
@@ -135,6 +136,7 @@ export default function TimeNav({
               onClick={e => { e.stopPropagation(); onYearChange(liunianYear + 1); if (view !== 'liunian') onViewChange('liunian'); }}
               className="text-[9px] w-4 h-4 flex items-center justify-center rounded"
               style={{ color: 'var(--t-faint)' }}
+              aria-label={t.nav.nextYear}
             >
               ›
             </button>
@@ -151,14 +153,14 @@ export default function TimeNav({
           className="flex items-center gap-2 mt-1.5 px-1 flex-wrap"
         >
           <span className="text-[9px]" style={{ color: 'var(--t-faint)' }}>
-            {view === 'daxian' ? '大限' : `${liunianYear}`}·{overlayInfo.stemName}年四化：
+            {t.nav.overlayIntro(view === 'daxian' ? t.nav.daxian : `${t.nav.liunian} ${liunianYear}`, overlayInfo.stemName)}
           </span>
-          {(['禄', '权', '科', '忌'] as const).map(sh => {
+          {SIHUA_ORDER.map(sh => {
             const starName = Object.keys(overlayInfo.overlay).find(k => overlayInfo.overlay[k] === sh);
             if (!starName) return null;
             return (
               <span key={sh} className="text-[9px] font-medium" style={{ color: SIHUA_COLORS[sh] }}>
-                {starName}化{sh}
+                {term(starName)} {SIHUA_FULL[sh]}
               </span>
             );
           })}
