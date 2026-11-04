@@ -123,3 +123,49 @@ npx tsx tests/unit/zi-hour-boundary.test.ts
 npx tsx scripts/verify/vn-cn-lunar-diff.ts             # ~11 phút
 npx tsx scripts/verify/make-golden.ts                  # chỉ khi cố ý cập nhật snapshot
 ```
+
+## Kiểm thử biên Việt Nam (hardening 2026-11)
+
+Ngày chạy: 2026-11-05. Node 24.22.0, ICU 78.3, tzdata **2026a** (`process.versions.tz`) — các kiểm tra múi giờ phụ thuộc dữ liệu IANA của runtime; test tự kiểm 8 mốc chuyển của `Asia/Ho_Chi_Minh` trước khi kiểm phần còn lại. Không sửa file nào trong `lib/ziwei/*`.
+
+### `tests/unit/vn-boundaries.test.ts` (13 306 phép kiểm, ~1,2 s)
+
+Oracle độc lập: UTC = giờ đồng hồ − offset; giờ mặt trời trung bình địa phương = UTC + kinh độ × 4 phút (+ EoT) — so với đường UI `vnUtcOffsetMinutes → formToBirthInfo → applyCalendar`. “Ngày âm engine thấy” = lunar-javascript trên ngày truyền vào `generateChart`; 19 lá số Tết được kiểm bằng chính `generateChart`.
+
+- **Múi giờ** (mốc theo tzdata): 1911-05-01 PLMT +7:06:30→+7, 1943-01-01 +7→+8, 1945-03-15 +8→+9, 1945-09-02 +9→+7, 1947-04-01 +7→+8, 1955-07-01 +8→+7, 1959-12-31 23:00 +7→+8, 1975-06-13 +8→+7. Quét từng phút ±150 phút quanh mỗi mốc (TP.HCM). Hành vi đã chọn và assert:
+  - khoảng **trống** (giờ không tồn tại: 1942-12-31 23:00–23:59, 1945-03-14 23:00–23:59, 1947-04-01 00:00–00:59, 1959-12-31 23:00–23:59, mỗi khoảng 60 phút) → offset **trước** mốc;
+  - khoảng **trùng** (giờ lặp: 1911-04-30 23:54–23:59 = 6 phút, 1945-09-01 22:00–23:59 = 120 phút, 1955-07-01 00:00–00:59, 1975-06-12 23:00–23:59) → offset **sau** mốc (+7), tức thời điểm muộn hơn. Comment cũ trong `lib/geo/vn-time.ts` ghi “pre-transition wins on overlap” là **sai** so với code; đã sửa comment (chỉ comment, không đổi hành vi).
+  - Ví dụ: TP.HCM 1959-12-31 23:30 (giờ trống) → +7 → 23:36,8 vãn Tý → `next-day` 1960-01-01 giờ Tý — trùng đúng thời điểm với 1960-01-01 00:30 (+8). TP.HCM 1975-06-12 23:30 (giờ lặp) → +7 → vãn Tý ngày 13; nếu hiểu là +8 thì 22:36,8 Hợi ngày 12 — người dùng sinh trong giờ lặp có thể nhận lá số khác 1 canh giờ và 1 ngày.
+  - Bắc (lat ≥ 17): +7 từ 1945-09-02; trước đó theo zone (Hà Nội 1944 = +8, giữa 1945 = +9). Vĩnh Linh (17,03) vs Đông Hà (16,82) ngày 1965-05-19 23:10: +7 → 23:18 vãn Tý (ngày 20) vs +8 → 22:18 Hợi (ngày 19). Biên 16,99 / 17,00 đã assert.
+  - Ma trận 9 đêm chuyển × giờ 22:30–01:30 (mỗi 5 phút) × 4 địa điểm × 2 quy tắc vãn Tý: ngày lá số + chi giờ khớp oracle; chi giờ xem trước của form (`calcTrueSolarBranch`) khớp chi giờ lá số.
+- **Giờ Tý**: 19 ngày (cuối tháng, cuối năm 1959/1975/1999, 28–29/2 các năm 1960/2000/2024, Tết VN/TQ 1985, 2007, 1968) × 9 giờ (22:50…01:00) × Hà Nội/TP.HCM × `next-day`/`current-day` × EoT bật/tắt × lịch `cn`/`vn`. Assert: ngày + chi giờ khớp oracle; `cn` không đổi ngày; `vn` → engine thấy đúng ngày âm VN (Hồ Ngọc Đức UTC+7), hoặc `unavailable` và giữ ngày TQ; giờ không đổi khi đổi lịch.
+  - Vãn Tý vượt **Tết VN nhưng không vượt Tết TQ**: Hà Nội 1985-01-20 23:30 `next-day` → 1985-01-21: lịch `vn` = 1/1 Ất Sửu (can 乙), lịch `cn` = 12/1 Giáp Tý; tương tự 2007-02-16 và 1968-01-28. Ngược lại (vượt Tết TQ, không vượt Tết VN): 1985-02-19, 2007-02-17, 1968-01-29 23:30.
+- **Kinh độ cực**: Mường Tè 102,1°E: −11,6 phút (UTC+7), −71,6 (UTC+8); Vạn Ninh 109,4°E: +17,6 / −42,4. Biên Hợi/Tý theo phút (VD Mường Tè 23:11 Hợi, 23:12 vãn Tý; ở UTC+8, 00:11 đồng hồ = 22:59,4 Hợi **ngày hôm trước** với mọi quy tắc).
+- **EoT**: 2000-02-11 ≈ −14,2 phút, 2000-11-03 ≈ +16,4 phút. Hà Nội 2000-11-03 22:50: tắt EoT → Hợi ngày 3; bật → 23:09,8 vãn Tý → ngày 4 (`next-day`). Hà Nội 2000-02-11 23:05: tắt → vãn Tý ngày 12; bật → 22:54,2 Hợi ngày 11. EoT bị bỏ qua khi form không có tỉnh (đã assert).
+
+### Golden VN: `scripts/verify/make-vn-golden.ts` → `tests/fixtures/vn-golden.json`, test `tests/unit/vn-golden.test.ts` (~5 s)
+
+- **63 case**: 15 mốc múi giờ (gồm PLMT 1910, Vĩnh Linh/Đông Hà, Huế 1968), 24 Tết (6 ngày × 2 quy tắc × 2 lịch), 4 ngày 28–29/2, 4 EoT, 3 kinh độ cực trong `vn-places`, 3 tháng nhuận (VN nhuận 2/1985 không có trong lịch TQ → `unavailable`), 10 case rải tỉnh/năm/giờ theo công thức cố định.
+- Đầu vào: ngày, giờ đồng hồ, tỉnh + thành phố trong `vn-places`, giới, quy tắc vãn Tý, lịch, EoT; offset tính bằng `vnUtcOffsetMinutes` như `BirthForm`. Đầu ra: `utcOffsetMinutes`, ngày lá số, ngày engine nhận (sau đổi lịch), `remapped`/`unavailable`, chi giờ, ngày âm, trụ năm, chi Mệnh/Thân, cục, 14 chính tinh → chi, Tứ Hóa bản mệnh sao@chi. Không có trường phụ thuộc ngày chạy, không HEAD repo, khoá JSON sắp xếp.
+- Test: deep-compare từng case; sinh 2 lần trong bộ nhớ → **giống từng byte** và bằng file. Đã kiểm: sửa tay 1 giá trị `ju` trong fixture → test fail; chạy generator 2 lần → cùng MD5.
+- Snapshot hồi quy, **không phải chân lý**.
+
+### Phát hiện
+
+1. **Comment sai trong `lib/geo/vn-time.ts`** (giờ lặp lấy offset sau mốc, không phải trước) — đã sửa comment, hành vi được khoá bằng test.
+2. **Lịch `vn` luôn dùng UTC+7, kể cả trước 1968 và cho miền Nam 1968–1975.** Lịch miền Bắc chuyển sang UTC+7 từ 1968; miền Nam (VNCH) vẫn ăn Tết Mậu Thân ngày **1968-01-30** (miền Bắc 01-29). Repro: `applyCalendar(formToBirthInfo({…Huế 1968-01-30 02:00…}), 'vn')` → engine nhận 1968-01-31 = mùng **2** (case `tz-1968-hue`), trong khi lịch dùng ở Huế lúc đó là mùng 1. Các ngày lệch trước 1968 trong §3 (VD Tết 1965-02-01) cũng là sản phẩm của việc áp UTC+7 ngược thời gian. Chưa sửa: là quyết định quy ước của chủ dự án.
+3. **`unavailable` âm thầm cho lá số năm âm TQ.** Hà Nội 1985-02-19 23:30 `current-day` lịch `vn`: ngày âm VN là 30/1 Ất Sửu, lịch TQ không có ngày tương ứng → `applyCalendar` trả `unavailable: true` và giữ ngày TQ = 30/12 **Giáp Tý** (sai cả năm can chi). `app/chart/page.tsx` có hiện cảnh báo; `app/heming/page.tsx` và `lib/server/http.ts` gọi `applyCalendar(...).info` mà không xét `unavailable` (grep) — không cảnh báo. Chưa sửa (ngoài phạm vi file).
+4. **Giả định “lat ≥ 17 ⇒ +7 từ 1945-09-02”** áp cả 1945–1954, trước khi có vĩ tuyến 17, và cho cả vùng Pháp kiểm soát (Hà Nội 1947–1954). Đây là giả định có ghi trong code, không kiểm chứng được bằng nguồn ở đây.
+5. Không thấy lỗi trong engine (`lib/ziwei/*`) trên phạm vi đã kiểm.
+
+### Chưa kiểm
+
+- Không có nguồn độc lập cho lá số VN (golden là snapshot của chính engine).
+- Hành vi múi giờ phụ thuộc tzdata của runtime (đã kiểm với 2026a); runtime khác có thể khác.
+- Không kiểm UI (không chạy `next build/dev`).
+
+```
+npx tsx tests/unit/vn-boundaries.test.ts
+npx tsx tests/unit/vn-golden.test.ts
+npx tsx scripts/verify/make-vn-golden.ts   # chỉ khi cố ý cập nhật snapshot
+```

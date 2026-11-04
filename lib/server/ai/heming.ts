@@ -26,12 +26,12 @@ export async function runHeming(a: ZiweiChart, b: ZiweiChart, relation: Relation
   const sources = numberSources([...(relation === 'love' ? hemingSources(stars) : []), ...classicSources(stars, 2)]);
   const question = sanitize(questionRaw, 1000);
   const task = `Phân tích HỢP HÔN giữa Người A và Người B cho mối quan hệ **${RELATIONS[relation]}**. Xét cung Mệnh, cung Phu Thê (với quan hệ tình cảm) hoặc các cung liên quan, Tứ Hóa năm sinh của mỗi người rơi vào cung nào của mình, và Đại Hạn hiện tại của cả hai. ` +
-    'Các mục: **Tóm tắt mức độ hòa hợp** (nêu rõ đây là đánh giá truyền thống, không có điểm số khoa học), **Điểm tương hợp**, **Điểm dễ va chạm**, **Thời vận hiện tại của hai người**, **Gợi ý để hòa hợp**. Luôn ghi rõ nhận định thuộc về Người A hay Người B.' +
+    'Trong mục Dữ kiện lá số, mỗi dòng bắt đầu bằng "Người A" hoặc "Người B". Các mục luận giải: **Tóm tắt mức độ hòa hợp** (nêu rõ đây là đánh giá truyền thống, không có điểm số khoa học), **Điểm tương hợp và dễ va chạm**, **Thời vận hiện tại của hai người**, **Gợi ý để hòa hợp**. Mỗi câu nói về một người phải ghi rõ Người A hay Người B.' +
     (question ? ` Ngoài ra trả lời câu hỏi trong khối câu hỏi.` : '');
   const messages = [
     { role: 'system' as const, content: SYSTEM_RULES },
     { role: 'user' as const, content: `${DELIMS.facts}\n${factsBlock(facts)}\n${DELIMS.end}\n\n${DELIMS.sources}\n${sources.length ? sourcesBlock(sources) : '(không có)'}\n${DELIMS.end}\n\n` +
       (question ? `${DELIMS.question}\n${question}\n${DELIMS.end}\n\n` : '') + `NHIỆM VỤ: ${task}` },
   ];
-  await streamWithFallback(provider, messages, facts, sources, [a, b], { mode: 'heming', relation, injectionSuspected: looksLikeInjection(question) }, send, signal);
+  await streamWithFallback(provider, messages, facts, sources, [a, b], { mode: 'heming', relation, injectionSuspected: looksLikeInjection(question) }, send, signal, new Date().getFullYear());
 }

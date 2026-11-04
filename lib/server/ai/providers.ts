@@ -6,7 +6,8 @@
  */
 export type ProviderId = 'ollama' | 'openai' | 'anthropic';
 export interface ChatMessage { role: 'system' | 'user' | 'assistant'; content: string }
-export interface StreamOpts { signal?: AbortSignal; temperature?: number; maxTokens?: number; idleTimeoutMs?: number }
+export interface ProviderStats { promptTokens?: number; outputTokens?: number; promptEvalMs?: number; evalMs?: number; loadMs?: number }
+export interface StreamOpts { signal?: AbortSignal; temperature?: number; maxTokens?: number; idleTimeoutMs?: number; onStats?: (s: ProviderStats) => void }
 
 const env = (k: string) => process.env[k]?.trim() || undefined;
 export const OLLAMA_URL = () => env('OLLAMA_BASE_URL') ?? 'http://127.0.0.1:11434';
@@ -99,10 +100,15 @@ export async function* streamChat(id: ProviderId, model: string, messages: ChatM
       if (!r.ok || !r.body) throw new Error(`Ollama HTTP ${r.status}: ${(await r.text()).slice(0, 200)}`);
       for await (const line of lines(r.body, guard.bump)) {
         if (!line.trim()) continue;
-        const j = JSON.parse(line) as { message?: { content?: string }; error?: string; done?: boolean };
+        const j = JSON.parse(line) as { message?: { content?: string }; error?: string; done?: boolean;
+          prompt_eval_count?: number; eval_count?: number; prompt_eval_duration?: number; eval_duration?: number; load_duration?: number };
         if (j.error) throw new Error(`Ollama: ${j.error}`);
         if (j.message?.content) yield j.message.content;
-        if (j.done) return;
+        if (j.done) {
+          const ms = (ns?: number) => (ns === undefined ? undefined : Math.round(ns / 1e6));
+          opts.onStats?.({ promptTokens: j.prompt_eval_count, outputTokens: j.eval_count, promptEvalMs: ms(j.prompt_eval_duration), evalMs: ms(j.eval_duration), loadMs: ms(j.load_duration) });
+          return;
+        }
       }
       return;
     }

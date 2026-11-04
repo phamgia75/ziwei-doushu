@@ -7,6 +7,7 @@ import { term } from '@/lib/i18n';
 import { TOPICS, type TopicKey } from '@/lib/i18n/vi/topics';
 import { app } from '@/lib/i18n/vi/app';
 import { common } from '@/lib/i18n/vi/common';
+import { reportStore } from '@/lib/client/report-store';
 import { birthPayload, streamSse } from '@/lib/client/sse';
 import { requestProvider, type Settings } from '@/lib/client/storage';
 import AiAnswer, { useAiStream } from '@/components/AiAnswer';
@@ -51,6 +52,16 @@ export function TopicsTab(ctx: Ctx) {
   };
 
   const tp = TOPICS.find(x => x.key === topic);
+  // register a fully translated dataset reading for the PDF report
+  useEffect(() => {
+    if (!tp || !total || paras.length < total || !paras.some(p => p.vi)) return;
+    reportStore.upsert({
+      id: `dataset:${tp.key}`, title: `${T.dataset} — ${tp.label}`, kind: 'dataset',
+      text: paras.map(p => p.vi ?? '').filter(Boolean).join('\n\n'),
+      sources: [{ id: 'S', title: 'Ziwei Doushu Open Interpretation Dataset v4.0', ref: `v4.0-13d#${tp.key}`, license: 'CC BY 4.0 — Wang Duoyu AI' }],
+      note: paras.some(p => p.ok === false) ? `${T.unchecked} (một số đoạn)` : 'Bản dịch máy', createdAt: new Date().toISOString(),
+    });
+  }, [tp, total, paras, T.dataset, T.unchecked]);
   return (
     <div>
       <p className="tv-note">{T.pick}</p>
@@ -63,7 +74,7 @@ export function TopicsTab(ctx: Ctx) {
         <div className="no-print" style={{ margin: '8px 0' }}>
           <button type="button" className="tv-btn tv-btn-primary" disabled={ai.loading} onClick={() => ai.run('/api/interpret', { ...base(ctx), mode: 'topic', topic: tp.key })}>{T.askAi}</button>
         </div>
-        <AiAnswer s={ai} />
+        <AiAnswer s={ai} title={`AI — ${tp.label}`} entryId={`topic:${tp.key}`} />
         <section style={{ marginTop: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
             <h4 style={{ fontWeight: 600 }}>{T.dataset}</h4>
@@ -114,7 +125,7 @@ export function ChatTab(ctx: Ctx) {
         </div>
       ))}
       {pending && <div className="tv-note" style={{ marginTop: 10 }}><b>{C.you}:</b> {pending}</div>}
-      <AiAnswer s={ai} />
+      <AiAnswer s={ai} title={`Hỏi AI — ${pending}`} entryId={`chat:${pending}`} />
       <div className="no-print" style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '12px 0' }}>
         {C.suggestions.map(s => <button key={s} type="button" className="tv-chip" onClick={() => ask(s)} disabled={ai.loading}>{s}</button>)}
       </div>
@@ -149,7 +160,7 @@ export function DetailTab(ctx: Ctx & { palace: Palace | null; star: Star | null;
         <StarDetailPanel star={star} palaceName={palace?.name} onClose={ctx.onClearStar} />
         <button type="button" className="tv-btn tv-btn-primary no-print" style={{ marginTop: 8 }} disabled={ai.loading} onClick={() => ai.run('/api/interpret', { ...base(ctx), mode: 'star', starName: star.name })}>{D.explainStar}</button>
       </section>}
-      <AiAnswer s={ai} />
+      <AiAnswer s={ai} title={star ? `AI — sao ${term(star.name)}` : `AI — cung ${term(palace?.name)}`} entryId={star ? `star:${star.name}` : `palace:${palace?.branch}`} />
     </div>
   );
 }
@@ -169,7 +180,7 @@ export function CyclesTab(ctx: Ctx) {
         </label>
         <button type="button" className="tv-btn tv-btn-primary" disabled={ai.loading} onClick={() => ai.run('/api/interpret', { ...base(ctx), mode: 'cycle', year })}>{Y.analyze}</button>
       </div>
-      <AiAnswer s={ai} />
+      <AiAnswer s={ai} title={`AI — Vận hạn năm ${year}`} entryId={`cycle:${year}`} />
       <h4 style={{ fontWeight: 600, marginTop: 16 }}>{Y.table}</h4>
       <ul className="tv-md" style={{ fontSize: 14 }}>
         {chart.daXians.map((dx, i) => (

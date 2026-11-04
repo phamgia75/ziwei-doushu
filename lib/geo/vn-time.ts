@@ -9,7 +9,9 @@
  *  - North (lat ≥ 17): +7 from 1945-09-02 (DRV declaration) on; before that the same
  *    Asia/Ho_Chi_Minh rule (French Indochina applied to the whole country).
  *  - The entered wall-clock time is local time at that offset; ambiguous/skipped minutes
- *    at a transition resolve to the offset found by two probes (pre-transition wins on overlap).
+ *    at a transition resolve to the offset found by two probes (first probe at +7): skipped minutes
+ *    (gap) get the pre-transition offset, repeated minutes (overlap) the post-transition one, i.e. the
+ *    later instant (tests/unit/vn-boundaries.test.ts).
  *  - No daylight saving: Vietnam has never observed it.
  */
 const ZONE = 'Asia/Ho_Chi_Minh';

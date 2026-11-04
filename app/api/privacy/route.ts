@@ -1,6 +1,7 @@
 import { guardRequest, readJson, jsonError } from '@/lib/server/http';
 import { clearDatasetCache } from '@/lib/server/dataset';
 import { clearTranslationCache } from '@/lib/server/translate';
+import { clearAnswerCache } from '@/lib/server/ai/answer-cache';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,6 @@ export async function POST(req: Request) {
   try {
     const body = await readJson(req);
     if (body.action !== 'clear-server-cache') return Response.json({ error: 'action không hợp lệ' }, { status: 400 });
-    return Response.json({ ok: true, removed: { datasetRecords: clearDatasetCache(), translations: clearTranslationCache() } });
+    return Response.json({ ok: true, removed: { datasetRecords: clearDatasetCache(), translations: clearTranslationCache(), answers: clearAnswerCache() } });
   } catch (e) { return jsonError(e); }
 }

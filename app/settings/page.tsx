@@ -99,7 +99,7 @@ export default function SettingsPage() {
             <button type="button" className="tv-btn" onClick={() => { if (window.confirm(S.clearLocalConfirm)) { clearAllLocal(); setS(DEFAULT_SETTINGS); setMsg(S.cleared); } }}>{S.clearLocal}</button>
             <button type="button" className="tv-btn" onClick={async () => {
               const r = await fetch('/api/privacy', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: 'clear-server-cache' }) }).then(x => x.json()).catch(() => null);
-              setMsg(r?.ok ? S.serverCleared(r.removed.datasetRecords, r.removed.translations) : app.ai.error);
+              setMsg(r?.ok ? S.serverCleared(r.removed.datasetRecords, r.removed.translations, r.removed.answers) : app.ai.error);
             }}>{S.clearServer}</button>
           </div>
         </section>

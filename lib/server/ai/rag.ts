@@ -45,7 +45,7 @@ export function topicsForQuestion(q: string): DatasetTopic[] {
 const clip = (s: string, n: number) => (s.length > n ? s.slice(0, n) + '…' : s);
 
 /** Dataset reading(s) for this exact chart, only if the record verifiably matches the chart. */
-export async function datasetSources(chart: ZiweiChart, topics: DatasetTopic[], maxChars = 2600): Promise<{ sources: Omit<Source, 'id'>[]; status: 'ok' | 'missing' | 'mismatch' }> {
+export async function datasetSources(chart: ZiweiChart, topics: DatasetTopic[], maxChars = 1800): Promise<{ sources: Omit<Source, 'id'>[]; status: 'ok' | 'missing' | 'mismatch' }> {
   const b = chart.birthInfo;
   const rec = await lookupRecord(b.year, b.month, b.day, b.hour, b.gender).catch(() => null);
   if (!rec) return { sources: [], status: 'missing' };
@@ -64,11 +64,11 @@ export async function datasetSources(chart: ZiweiChart, topics: DatasetTopic[], 
 }
 
 /** Classical paragraphs that mention the given stars (most star hits first). */
-export function classicSources(stars: string[], limit = 3): Omit<Source, 'id'>[] {
+export function classicSources(stars: string[], limit = 2): Omit<Source, 'id'>[] {
   const scored: { score: number; s: Omit<Source, 'id'> }[] = [];
   for (const book of ALL_BOOKS) for (const ch of book.chapters) for (const p of ch.paragraphs) {
     const score = stars.filter(st => p.text.includes(st)).length;
-    if (score) scored.push({ score, s: { origin: 'classic', title: `${book.title} · ${ch.title}`, ref: `classics:${book.slug}/${p.id}`, license: 'Phạm vi công cộng (public domain)', text: clip(p.text, 400) } });
+    if (score) scored.push({ score, s: { origin: 'classic', title: `${book.title} · ${ch.title}`, ref: `classics:${book.slug}/${p.id}`, license: 'Phạm vi công cộng (public domain)', text: clip(p.text, 300) } });
   }
   return scored.sort((a, b) => b.score - a.score).slice(0, limit).map(x => x.s);
 }

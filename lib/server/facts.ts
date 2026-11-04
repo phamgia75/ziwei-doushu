@@ -56,7 +56,9 @@ export function buildFacts(chart: ZiweiChart, opts: { year?: number; patterns?: 
       ? `chính tinh: ${majors.join(', ')}`
       : `Vô Chính Diệu (không chính tinh), mượn chính tinh cung đối ${term(p.borrowedFromName ?? '')}: ${(p.borrowedStars ?? []).map(term).join(', ') || '—'}`;
     const self = p.selfSihua?.length ? `; Tự Hóa: ${p.selfSihua.map(x => `${term(x.starName)} tự hóa ${term(x.siHua)}`).join(', ')}` : '';
-    add('palace', `${head}: ${main}; phụ/sát/tạp tinh: ${others.join(', ') || '—'}${self}.`, p.branch);
+    const nb = (d: number) => term(byBranch((p.branch + d) % 12)?.name);
+    const sf = `; Tam Phương Tứ Chính: đối cung ${nb(6)}, tam hợp ${nb(4)} và ${nb(8)}; giáp ${nb(11)} và ${nb(1)}`;
+    add('palace', `${head}: ${main}; phụ/sát/tạp tinh: ${others.join(', ') || '—'}${self}${sf}.`, p.branch);
   }
 
   add('sihua', `Tứ Hóa năm sinh (can ${stemBranchVi(li.yearStem, li.yearBranch).split(' ')[0]}): ` +
