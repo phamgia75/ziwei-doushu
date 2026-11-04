@@ -30,3 +30,15 @@ test('settings: external provider cannot be chosen without server config', async
   await expect(page.getByRole('radio', { name: /OpenAI/ })).toBeDisabled();
   await expect(page.getByRole('radio', { name: /Claude/ })).toBeDisabled();
 });
+
+test('download native PDF report @desktop-only', async ({ page }) => {
+  await page.goto('/chart');
+  await fillBirthForm(page, { day: '2', month: '1', year: '1990', hour: '7', minute: '10', province: 'Hà Nội', gender: 'Nam', name: 'PDF thử' });
+  await page.waitForLoadState('networkidle');
+  const [dl] = await Promise.all([page.waitForEvent('download'), page.getByRole('button', { name: /Tải báo cáo PDF/ }).click()]);
+  expect(dl.suggestedFilename()).toMatch(/^tuvi-.*\.pdf$/);
+  const buf = Buffer.concat(await (await dl.createReadStream()).toArray());
+  expect(buf.subarray(0, 5).toString()).toBe('%PDF-');
+  expect(buf.length).toBeGreaterThan(20_000);
+  expect(buf.length).toBeLessThan(1_500_000);
+});

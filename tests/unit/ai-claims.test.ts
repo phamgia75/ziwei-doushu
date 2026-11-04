@@ -47,6 +47,13 @@ one('Cung Quan Lộc có Tử Vi và Thiên Phủ đồng cung.', 'placement', '
 one('Vũ Khúc tọa tại Tuất.', 'placement', 'verified');
 one('Cung Quan Lộc tại Dần.', 'palace-at', 'verified');
 one('Cung Quan Lộc tại Ngọ.', 'palace-at', 'contradicted');
+// explicit decade / year scopes (Codex L2 round 2 repros)
+one('Đại Hạn hiện tại Tham Lang Hóa Kỵ.', 'sihua-star', 'contradicted'); // current Đại Hạn Kỵ = Văn Xương
+one('Đại Hạn Tham Lang Hóa Kỵ.', 'sihua-star', 'unverified');           // which decade? (true in 16–25 only)
+one('Đại Hạn 16–25 Tham Lang Hóa Kỵ.', 'sihua-star', 'verified');
+one('Đại Hạn 36–45 Tham Lang Hóa Kỵ.', 'sihua-star', 'contradicted');
+one('Năm 2024 Liêm Trinh Hóa Kỵ.', 'sihua-star', 'contradicted');       // 2024 Giáp: Kỵ Thái Dương
+one('Năm 2024 Thái Dương Hóa Kỵ.', 'sihua-star', 'verified');
 // doctrine / hypotheticals are not claims about this chart
 assert.deepEqual(run('Nếu Tử Vi ở cung Mệnh thì là người có uy.'), []);
 assert.deepEqual(run('Theo cổ thư, Tham Lang hội Hỏa Tinh chủ phát tài bất ngờ.'), []);

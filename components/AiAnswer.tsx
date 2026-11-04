@@ -23,11 +23,13 @@ export function useAiStream() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const ctl = useRef<AbortController | null>(null);
+  // which report entry this answer belongs to, fixed when the request starts (not from live UI state)
+  const [entry, setEntry] = useState<{ id: string; title: string; chartKey: string } | null>(null);
 
-  const run = useCallback(async (url: string, body: unknown): Promise<string> => {
+  const run = useCallback(async (url: string, body: unknown, ent?: { id: string; title: string; chartKey: string }): Promise<string> => {
     ctl.current?.abort();
     const c = new AbortController(); ctl.current = c;
-    setText(''); setMeta({}); setError(''); setLoading(true);
+    setText(''); setMeta({}); setError(''); setLoading(true); setEntry(ent ?? null);
     let acc = '';
     try {
       await streamSse(url, body, ev => {
@@ -52,8 +54,8 @@ export function useAiStream() {
   }, []);
 
   const stop = useCallback(() => { ctl.current?.abort(); setLoading(false); }, []);
-  const reset = useCallback(() => { ctl.current?.abort(); setText(''); setMeta({}); setError(''); setLoading(false); }, []);
-  return { text, meta, loading, error, run, stop, reset };
+  const reset = useCallback(() => { ctl.current?.abort(); setText(''); setMeta({}); setError(''); setLoading(false); setEntry(null); }, []);
+  return { text, meta, loading, error, run, stop, reset, entry };
 }
 
 function Trace({ meta, focus }: { meta: Meta; focus: string | null }) {
@@ -101,20 +103,21 @@ function Verification({ v }: { v: Validation }) {
   );
 }
 
-export default function AiAnswer({ s, title, entryId }: { s: ReturnType<typeof useAiStream>; title?: string; entryId?: string }) {
+export default function AiAnswer({ s }: { s: ReturnType<typeof useAiStream> }) {
   const [focus, setFocus] = useState<string | null>(null);
   const v = s.meta.validation;
   // register the finished answer for the PDF report (page-session only)
   useEffect(() => {
-    if (!entryId || s.loading || !s.text || (!v && s.meta.fallback !== 'deterministic')) return;
+    const ent = s.entry;
+    if (!ent || s.loading || !s.text || (!v && s.meta.fallback !== 'deterministic')) return;
     const cited = new Set([...(v?.citedFacts ?? []), ...(v?.citedSources ?? [])]);
     reportStore.upsert({
-      id: entryId, title: title ?? entryId, kind: 'ai', text: s.text, provider: s.meta.provider, model: s.meta.model,
+      id: ent.id, title: ent.title, chartKey: ent.chartKey, kind: 'ai', text: s.text, provider: s.meta.provider, model: s.meta.model,
       facts: (s.meta.facts ?? []).filter(f => cited.has(f.id)), sources: (s.meta.sources ?? []).filter(x => cited.has(x.id)).map(({ id, title: tt, ref, license }) => ({ id, title: tt, ref, license })),
       verification: v?.summary ? { checked: v.summary.verified + v.summary.contradicted, contradicted: v.summary.contradicted, unverified: v.summary.unverified } : undefined,
       note: s.meta.fallback === 'deterministic' ? t.deterministic : undefined, createdAt: new Date().toISOString(),
     });
-  }, [entryId, title, s.loading, s.text, v, s.meta]);
+  }, [s.entry, s.loading, s.text, v, s.meta]);
   if (!s.text && !s.loading && !s.error) return null;
   return (
     <div className="print-avoid-break" style={{ marginTop: 12 }}>

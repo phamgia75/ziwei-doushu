@@ -11,7 +11,8 @@ import ChartBoard from '@/components/ChartBoard';
 import ChartSummary from '@/components/ChartSummary';
 import PdfExportButton from '@/components/PdfExportButton';
 import SiteHeader from '@/components/SiteHeader';
-import { TopicsTab, ChatTab, DetailTab, CyclesTab, PatternsTab } from '@/components/workspace/Tabs';
+import { TopicsTab, ChatTab, DetailTab, CyclesTab, PatternsTab, chartKey } from '@/components/workspace/Tabs';
+import { reportStore } from '@/lib/client/report-store';
 import { generateChart, setBrightnessSchool } from '@/lib/ziwei/algorithm';
 import type { BirthInfo, Palace, Star, ZiweiChart } from '@/lib/ziwei/types';
 import type { PatternVi, mingGongSummaryVi } from '@/lib/i18n/vi/patterns';
@@ -52,6 +53,10 @@ function Workspace() {
   const lastForm = useRef<BirthFormState | null>(null);
 
   useEffect(() => { setSettings(loadSettings()); setSaved(listCharts()); }, []);
+  // PDF report entries belong to exactly one chart: switching/closing the chart drops the previous ones
+  useEffect(() => {
+    reportStore.setChart(chart && baseInfo ? chartKey({ birth: baseInfo, settings, region: vnRegion(form?.province, form?.city) }) : '');
+  }, [chart, baseInfo, settings, form]);
 
   const open = useCallback((f: BirthFormState, info: BirthInfo, id?: string) => {
     const s = loadSettings();

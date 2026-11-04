@@ -13,8 +13,10 @@ test.describe('@ai local AI', () => {
     await page.getByRole('button', { name: 'Sự nghiệp', exact: true }).click();
     await expect(page.getByText(/Đang dịch đoạn|Hiện nguyên văn/).first()).toBeVisible({ timeout: 120_000 });
     await page.getByRole('button', { name: 'AI phân tích chủ đề này' }).click();
-    await expect(page.getByText(/Đã đối chiếu|nhận định không khớp|Không có nhận định vị trí/)).toBeVisible({ timeout: 300_000 });
+    await expect(page.getByTestId('verify-summary').first()).toBeVisible({ timeout: 300_000 });
+    await expect(page.getByTestId('verify-summary').first()).toContainText(/✓ \d+ khớp lá số/);
     await expect(page.getByText(/Mô hình: qwen/)).toBeVisible();
+    await expect(page.locator('.tv-md strong', { hasText: 'Dữ kiện lá số' }).first()).toBeVisible();
     await expect(page.locator('.tv-ref').first()).toBeVisible(); // [F#]/[S#] citations rendered
     expect(await untranslatedText(page)).toEqual([]);
   });
@@ -23,7 +25,7 @@ test.describe('@ai local AI', () => {
     await page.getByRole('tab', { name: 'Hỏi AI' }).click();
     await page.getByRole('textbox').fill('Cung Mệnh của tôi có chính tinh nào?');
     await page.getByRole('button', { name: 'Gửi' }).click();
-    await expect(page.getByText(/Đã đối chiếu|nhận định không khớp|Không có nhận định vị trí/)).toBeVisible({ timeout: 300_000 });
+    await expect(page.getByTestId('verify-summary').or(page.getByText('Không có nhận định nào')).first()).toBeVisible({ timeout: 300_000 });
     await expect(page.locator('.tv-md:visible').first()).toContainText(/Liêm Trinh|Phá Quân/);
   });
 });

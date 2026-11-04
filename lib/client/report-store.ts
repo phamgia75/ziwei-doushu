@@ -14,15 +14,20 @@ export interface ReportEntry {
   verification?: { checked: number; contradicted: number; unverified: number };
   note?: string;              // e.g. "bản dịch máy", "dữ kiện thay thế (AI không khả dụng)"
   createdAt: string;
+  /** Chart the entry belongs to (birth fields + conventions); entries of other charts are never exported. */
+  chartKey?: string;
 }
 
 const entries = new Map<string, ReportEntry>();
+let activeChart = '';
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach(l => l());
 
 export const reportStore = {
-  upsert(e: ReportEntry) { entries.set(e.id, e); emit(); },
-  list(): ReportEntry[] { return [...entries.values()]; },
+  /** Switch to another chart: drops every entry of the previous one. */
+  setChart(key: string) { if (key !== activeChart) { activeChart = key; entries.clear(); emit(); } },
+  upsert(e: ReportEntry) { if (e.chartKey !== activeChart) return; entries.set(e.id, e); emit(); },
+  list(): ReportEntry[] { return [...entries.values()].filter(e => e.chartKey === activeChart); },
   clear() { entries.clear(); emit(); },
   subscribe(fn: () => void) { listeners.add(fn); return () => { listeners.delete(fn); }; },
 };

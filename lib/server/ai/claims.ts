@@ -33,6 +33,7 @@ const REL_WORDS = /(?<!\p{L})(tam hợp|xung chiếu|xung|đối cung|đối di�
 
 interface Model {
   label?: 'A' | 'B';
+  year: number;
   starBranch: Map<string, number>;            // vi star → branch
   starBright: Map<string, string>;            // vi star → vi brightness word
   mingZhu: string; shenZhu: string; shenPalace: string;
@@ -41,6 +42,7 @@ interface Model {
   natal: Map<string, string>;                 // vi sihua word ('Lộc') → vi star
   daxian: Map<string, Set<string>>;           // sihua word → stars (any Đại Hạn; current first)
   daxianCurrent: Map<string, string>;
+  daxianByAge: Map<number, Map<string, string>>; // Đại Hạn startAge → sihua word → star
   liunian: Map<string, string>;
   self: Map<string, Set<string>>;             // sihua word → stars with Tự Hóa
   starRe: RegExp; palaceRe: RegExp;
@@ -58,10 +60,13 @@ function buildModel(chart: ZiweiChart, year: number, label?: 'A' | 'B'): Model {
     for (const x of p.selfSihua ?? []) { const k = zh2vi(x.siHua); (self.get(k) ?? self.set(k, new Set()).get(k)!).add(term(x.starName)); }
   }
   const daxian = new Map<string, Set<string>>(), daxianCurrent = new Map<string, string>(), liunian = new Map<string, string>();
+  const daxianByAge = new Map<number, Map<string, string>>();
   chart.daXians.forEach((_, i) => {
     const sh = getDaXianSiHua(chart, i); if (!sh) return;
+    const byHua = new Map<string, string>();
+    daxianByAge.set(chart.daXians[i].startAge, byHua);
     for (const [h, star] of Object.entries(sh.transforms)) {
-      const k = zh2vi(h); (daxian.get(k) ?? daxian.set(k, new Set()).get(k)!).add(term(star));
+      const k = zh2vi(h); byHua.set(k, term(star)); (daxian.get(k) ?? daxian.set(k, new Set()).get(k)!).add(term(star));
       if (i === chart.currentDaXianIndex) daxianCurrent.set(k, term(star));
     }
   });
@@ -69,7 +74,7 @@ function buildModel(chart: ZiweiChart, year: number, label?: 'A' | 'B'): Model {
   const stars = [...starBranch.keys()].sort((a, b) => b.length - a.length);
   const palaces = [...new Set(chart.palaces.map(p => term(p.name)))];
   return {
-    label, starBranch, starBright, mingZhu: term(chart.mingZhu), shenZhu: term(chart.shenZhu),
+    label, year, daxianByAge, starBranch, starBright, mingZhu: term(chart.mingZhu), shenZhu: term(chart.shenZhu),
     shenPalace: term(chart.palaces.find(p => p.branch === chart.shenGongBranch)?.name), palaceBranch, palaceByBranch, natal, daxian, daxianCurrent, liunian, self,
     starRe: new RegExp(`${word(stars)}(?! Đẩu)`, 'gu'),
     // "cung X" always; bare multi-word palace names too (bare "Mệnh"/"Thân" are too ambiguous)
@@ -83,21 +88,36 @@ const BRIGHT_VI = ['Miếu', 'Vượng', 'Đắc', 'Lợi', 'Bình', 'Bất', 'N
 const uniq = <T>(a: T[]) => [...new Set(a)];
 const d12 = (a: number, b: number) => ((b - a) % 12 + 12) % 12;
 
-function sihuaContext(s: string): 'daxian' | 'liunian' | 'self' | 'natal' {
-  if (/tự hóa|tự hoá/iu.test(s)) return 'self';
-  if (/lưu niên|năm \d{4}|năm nay/iu.test(s)) return 'liunian';
-  if (/đại hạn|đại vận|hạn \d/iu.test(s)) return 'daxian';
-  return 'natal';
+type SihuaScope = { kind: 'natal' | 'self' | 'liunian' | 'daxian-current' | 'daxian-at' | 'daxian-any'; label: string; map?: Map<string, string> };
+
+const ZH2VI: Record<string, string> = { '禄': 'Lộc', '权': 'Quyền', '科': 'Khoa', '忌': 'Kỵ' };
+
+/** Which set of transformations a sentence talks about. Explicit years / decades are honoured. */
+function sihuaScope(m: Model, s: string): SihuaScope {
+  if (/tự hóa|tự hoá/iu.test(s)) return { kind: 'self', label: 'Tự Hóa' };
+  const yr = s.match(/năm\s+(\d{4})/iu);
+  if (yr || /lưu niên|năm nay/iu.test(s)) {
+    const y = yr ? Number(yr[1]) : m.year;
+    const map = new Map(Object.entries(getLiuNianSiHua(y).transforms).map(([h, st]) => [ZH2VI[h], term(st)]));
+    return { kind: 'liunian', label: `Lưu Niên ${y}`, map };
+  }
+  if (/đại hạn|đại vận/iu.test(s)) {
+    const ages = s.match(/(\d{1,3})\s*[–-]\s*(\d{1,3})/u);
+    if (ages && m.daxianByAge.has(Number(ages[1]))) return { kind: 'daxian-at', label: `Đại Hạn ${ages[1]}–${ages[2]}`, map: m.daxianByAge.get(Number(ages[1])) };
+    if (/hiện tại|này|đang|hiện nay/iu.test(s)) return { kind: 'daxian-current', label: 'Đại Hạn hiện tại', map: m.daxianCurrent };
+    return { kind: 'daxian-any', label: 'Đại Hạn (không rõ đại hạn nào)', map: m.daxianCurrent };
+  }
+  return { kind: 'natal', label: 'năm sinh', map: m.natal };
 }
 
-function checkSihuaStar(m: Model, star: string, hua: string, ctx: ReturnType<typeof sihuaContext>): [ClaimStatus, string] {
-  const inNatal = m.natal.get(hua) === star, inDx = m.daxian.get(hua)?.has(star), inLn = m.liunian.get(hua) === star, inSelf = m.self.get(hua)?.has(star);
-  const ok = ctx === 'natal' ? inNatal : ctx === 'daxian' ? inDx : ctx === 'liunian' ? inLn : inSelf;
-  if (ok) return ['verified', `${star} Hóa ${hua} (${ctx})`];
-  // explicit Lưu Niên / Tự Hóa context is decidable; implicit (natal) or Đại Hạn (which one?) context may be ambiguous
-  if ((ctx === 'natal' || ctx === 'daxian') && (inNatal || inDx || inLn || inSelf)) return ['unverified', `${star} Hóa ${hua} có trong lá số nhưng ở bối cảnh khác (${[inNatal && 'năm sinh', inDx && 'Đại Hạn', inLn && 'Lưu Niên', inSelf && 'Tự Hóa'].filter(Boolean).join(', ')})`];
-  const actual = ctx === 'natal' ? m.natal.get(hua) : ctx === 'liunian' ? m.liunian.get(hua) : ctx === 'daxian' ? m.daxianCurrent.get(hua) : undefined;
-  return ['contradicted', `${star} không Hóa ${hua}${actual ? `; Hóa ${hua} ${ctx === 'natal' ? 'năm sinh' : ctx === 'liunian' ? 'Lưu Niên' : 'Đại Hạn hiện tại'} là ${actual}` : ''}`];
+function checkSihuaStar(m: Model, star: string, hua: string, sc: SihuaScope): [ClaimStatus, string] {
+  const inScope = sc.kind === 'self' ? !!m.self.get(hua)?.has(star) : sc.map?.get(hua) === star;
+  if (inScope) return ['verified', `${star} Hóa ${hua} (${sc.label})`];
+  const elsewhere = [m.natal.get(hua) === star && 'năm sinh', m.daxian.get(hua)?.has(star) && 'một Đại Hạn', m.liunian.get(hua) === star && `Lưu Niên ${m.year}`, m.self.get(hua)?.has(star) && 'Tự Hóa'].filter(Boolean);
+  // only an implicit context (natal by default, or "Đại Hạn" without saying which) is ambiguous
+  if ((sc.kind === 'natal' || sc.kind === 'daxian-any') && elsewhere.length) return ['unverified', `${star} Hóa ${hua} không thuộc ${sc.label} nhưng có ở: ${elsewhere.join(', ')}`];
+  const actual = sc.map?.get(hua);
+  return ['contradicted', `${star} không Hóa ${hua} trong ${sc.label}${actual ? `; Hóa ${hua} ${sc.label} là ${actual}` : ''}`];
 }
 
 function clauseClaims(m: Model, raw: string, subject?: string): Claim[] {
@@ -156,18 +176,18 @@ function clauseClaimsCore(m: Model, s: string, raw: string, subject?: string): C
 
   // Tứ Hóa: "<Star> Hóa X"
   for (const mm of s.matchAll(new RegExp(`${m.starRe.source}\\s+(?:hóa|hoá)\\s+(Lộc|Quyền|Khoa|Kỵ|Kị)(?!${L})`, 'giu'))) {
-    const [st, d] = checkSihuaStar(m, mm[1], mm[2] === 'Kị' ? 'Kỵ' : mm[2], sihuaContext(s));
+    const [st, d] = checkSihuaStar(m, mm[1], mm[2] === 'Kị' ? 'Kỵ' : mm[2], sihuaScope(m, s));
     push('sihua-star', st, d); handled = true;
   }
   // "Hóa X nhập/vào/tại cung P" (the transformed star must sit in P)
   for (const mm of s.matchAll(new RegExp(`(?:hóa|hoá)\\s+(Lộc|Quyền|Khoa|Kỵ|Kị)(?!${L})[^.;]{0,25}?(?:nhập|vào|tại|ở|rơi vào|đóng|→)\\s*(?:cung\\s+)?${word([...m.palaceByBranch.values()])}`, 'giu'))) {
     const hua = mm[1] === 'Kị' ? 'Kỵ' : mm[1];
-    const ctx = sihuaContext(s);
-    const star = ctx === 'natal' ? m.natal.get(hua) : ctx === 'liunian' ? m.liunian.get(hua) : ctx === 'daxian' ? m.daxianCurrent.get(hua) : undefined;
+    const sc = sihuaScope(m, s);
+    const star = sc.kind === 'self' ? undefined : sc.map?.get(hua);
     const target = [...m.palaceBranch.keys()].find(k => k === mm[2].toLowerCase())!;
     if (!star) push('sihua-in', 'unverified', `không xác định được sao Hóa ${hua} trong bối cảnh này`);
     else if (m.starBranch.get(star) === pB(target)) push('sihua-in', 'verified', `Hóa ${hua} (${star}) ở cung ${pName(target)}`);
-    else if (ctx === 'daxian') push('sihua-in', 'unverified', `Hóa ${hua} Đại Hạn phụ thuộc Đại Hạn nào; Đại Hạn hiện tại: ${star} ở cung ${m.palaceByBranch.get(m.starBranch.get(star)!)}`);
+    else if (sc.kind === 'daxian-any') push('sihua-in', 'unverified', `Hóa ${hua} Đại Hạn phụ thuộc Đại Hạn nào; Đại Hạn hiện tại: ${star} ở cung ${m.palaceByBranch.get(m.starBranch.get(star)!)}`);
     else push('sihua-in', 'contradicted', `Hóa ${hua} là ${star}, nằm ở cung ${m.palaceByBranch.get(m.starBranch.get(star)!)}, không phải cung ${pName(target)}`);
     handled = true;
   }
